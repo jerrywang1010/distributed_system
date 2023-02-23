@@ -1,10 +1,11 @@
 package mr
 
-import "fmt"
-import "log"
-import "net/rpc"
-import "hash/fnv"
-
+import (
+	"fmt"
+	"hash/fnv"
+	"log"
+	"net/rpc"
+)
 
 //
 // Map functions return a slice of KeyValue.
@@ -24,7 +25,6 @@ func ihash(key string) int {
 	return int(h.Sum32() & 0x7fffffff)
 }
 
-
 //
 // main/mrworker.go calls this function.
 //
@@ -32,10 +32,33 @@ func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 
 	// Your worker implementation here.
+	w := WORKER{mapf: mapf, redecef: reducef}
+	// talk to master to get an ID
+	w.register()
+	w.executeTask()
+}
 
-	// uncomment to send the Example RPC to the master.
-	// CallExample()
+type WORKER struct {
+	id      int
+	mapf    func(string, string) []KeyValue
+	redecef func(string, []string) string
+}
 
+func (w *WORKER) executeTask() {
+	for {
+		//
+	}
+}
+
+func (w *WORKER) register() {
+	args := RegisterWorkerArgs{}
+	reply := RegisterWorkerReply{}
+
+	success := call("Master.RegisterWorker", &args, &reply)
+	if !success {
+		log.Fatal("Unable to register a worker\n")
+	}
+	debugPrintln("registering a new worker, id=%v\n", reply)
 }
 
 //

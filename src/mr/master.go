@@ -1,15 +1,26 @@
 package mr
 
-import "log"
-import "net"
-import "os"
-import "net/rpc"
-import "net/http"
+import (
+	"log"
+	"net"
+	"net/http"
+	"net/rpc"
+	"os"
+	"sync"
+	"time"
+)
 
+const (
+	timeout = time.Second * 10
+)
 
 type Master struct {
 	// Your definitions here.
-
+	files        []string
+	nReduce      int
+	nextWorkerId int
+	mtx          sync.Mutex
+	allDone      bool
 }
 
 // Your code here -- RPC handlers for the worker to call.
@@ -24,6 +35,13 @@ func (m *Master) Example(args *ExampleArgs, reply *ExampleReply) error {
 	return nil
 }
 
+func (m *Master) RegisterWorker(args *RegisterWorkerArgs, reply *RegisterWorkerReply) error {
+	m.mtx.Lock()
+	defer m.mtx.Unlock()
+	reply.WorkerID = m.nextWorkerId
+	m.nextWorkerId += 1
+	return nil
+}
 
 //
 // start a thread that listens for RPCs from worker.go
@@ -50,7 +68,6 @@ func (m *Master) Done() bool {
 
 	// Your code here.
 
-
 	return ret
 }
 
@@ -61,10 +78,13 @@ func (m *Master) Done() bool {
 //
 func MakeMaster(files []string, nReduce int) *Master {
 	m := Master{}
-
 	// Your code here.
-
+	m.mtx = sync.Mutex{}
+	m.nReduce = nReduce
+	m.files = files
+	m.nextWorkerId = 0
 
 	m.server()
+	debugPrintln("master is up\n")
 	return &m
 }
