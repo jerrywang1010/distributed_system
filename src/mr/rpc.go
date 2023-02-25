@@ -32,6 +32,15 @@ type RegisterWorkerReply struct {
 	WorkerID int
 }
 
+type AskForTaskArgs struct {
+	WorkerId int
+}
+
+type AskForTaskReply struct {
+	MapOrReduce int
+	Task        Task
+}
+
 // Add your RPC definitions here.
 
 // Cook up a unique-ish UNIX-domain socket name

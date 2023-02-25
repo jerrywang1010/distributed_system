@@ -35,7 +35,12 @@ func Worker(mapf func(string, string) []KeyValue,
 	w := WORKER{mapf: mapf, redecef: reducef}
 	// talk to master to get an ID
 	w.register()
-	w.executeTask()
+	for {
+		t := w.askForTask()
+		w.executeTask(t)
+		w.done()
+	}
+
 }
 
 type WORKER struct {
@@ -44,10 +49,31 @@ type WORKER struct {
 	redecef func(string, []string) string
 }
 
-func (w *WORKER) executeTask() {
-	for {
-		//
+func (w *WORKER) executeTask(t Task) {
+
+}
+
+func (w *WORKER) askForTask() Task {
+	args := AskForTaskArgs{}
+	reply := AskForTaskReply{}
+	if w.id < 0 {
+		panic("invalid worker.id\n")
 	}
+	args.WorkerId = w.id
+	success := call("Master.AssignATask", &args, &reply)
+	if !success {
+		log.Fatal("Unable to ask master for a task\n")
+	}
+	if reply.MapOrReduce == inMap {
+		debugPrintln("worker=%v got map task from master, fileName=%v, taskID=%v", w.id, reply.Task.fileName, reply.Task.id)
+	} else {
+		debugPrintln("worker=%v got reduce task from master, taskID=%v", w.id, reply.Task.id)
+	}
+	return reply.Task
+}
+
+func (w *WORKER) done() {
+
 }
 
 func (w *WORKER) register() {
