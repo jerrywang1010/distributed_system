@@ -29,7 +29,9 @@ type RegisterWorkerArgs struct {
 }
 
 type RegisterWorkerReply struct {
-	WorkerID int
+	WorkerID  int
+	NumReduce int
+	NumMap    int
 }
 
 type AskForTaskArgs struct {
@@ -37,8 +39,16 @@ type AskForTaskArgs struct {
 }
 
 type AskForTaskReply struct {
-	MapOrReduce int
-	Task        Task
+	Task Task
+}
+
+type DoneTaskArgs struct {
+	WorkerId int
+	TaskId   int
+}
+
+type DoneTaskReply struct {
+	Reply string
 }
 
 // Add your RPC definitions here.

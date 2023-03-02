@@ -15,17 +15,22 @@ const (
 	updateProgressInterval = time.Millisecond * 500
 )
 
+// global variable
+// they should only be modified by master
+// nReduce should be initialized and never change
+// phase will be initialized and updated once only by acquire a lock of master
 type Master struct {
 	// Your definitions here.
 	files          []string
-	nReduce        int
 	nextWorkerId   int
 	mtx            sync.Mutex
 	allDone        bool
-	phase          int
 	allTasksStates []TaskState
 	taskCh         chan Task
 	done           bool
+	phase          int
+	numReduce      int
+	numMap         int
 }
 
 // Your code here -- RPC handlers for the worker to call.
@@ -44,6 +49,10 @@ func (m *Master) RegisterWorker(args *RegisterWorkerArgs, reply *RegisterWorkerR
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	reply.WorkerID = m.nextWorkerId
+	reply.NumMap = m.numMap
+	reply.NumReduce = m.numReduce
+	debugPrintln("registering a new worker, workerID=%v, numMap=%v, numReduce=%v\n",
+		m.nextWorkerId, m.numMap, m.numReduce)
 	m.nextWorkerId += 1
 	return nil
 }
@@ -75,13 +84,40 @@ func (m *Master) Done() bool {
 	return ret
 }
 
+// when a worker has finished a task, map or reduce, will send this rpc to master
+func (m *Master) DoneTask(args *DoneTaskArgs, reply *DoneTaskReply) error {
+	// need to modify the stata of tasks, so first lock
+	m.mtx.Lock()
+	defer m.mtx.Unlock()
+	debugPrintln("received DoneTask RPC from worker=%v, for task=%v\n", args.WorkerId, args.TaskId)
+	reply.Reply = "Thank you!"
+	// some checks
+	if m.allTasksStates[args.TaskId].state != running {
+		log.Fatal("task is not running\n")
+	}
+	if m.allTasksStates[args.TaskId].workerId != args.WorkerId {
+		log.Fatalf("task belong to other worker=%v\n", m.allTasksStates[args.TaskId].workerId)
+	}
+
+	m.allTasksStates[args.TaskId].state = done
+	m.allTasksStates[args.TaskId].workerId = -1
+	return nil
+}
+
 // intialize all tasks to be map, called at the beggining
 // when this is called, there is only 1 master thread running
 func (m *Master) initMap() {
+	m.mtx.Lock()
+	defer m.mtx.Unlock()
 	debugPrintln("initializing master, marking all map task as not started\n")
 	m.allTasksStates = make([]TaskState, len(m.files))
 	m.phase = inMap
-	m.taskCh = make(chan Task, len(m.files))
+	if len(m.files) <= m.numReduce {
+		m.taskCh = make(chan Task, len(m.files))
+	} else {
+		m.taskCh = make(chan Task, m.numReduce)
+	}
+	m.numMap = len(m.files)
 	for idx, _ := range m.allTasksStates {
 		m.allTasksStates[idx].state = new
 		m.allTasksStates[idx].workerId = -1
@@ -92,9 +128,11 @@ func (m *Master) initMap() {
 // when this is called, master's lock is already acquired
 func (m *Master) initReduce() {
 	debugPrintln("initializing reduce tasks\n")
-	m.allTasksStates = make([]TaskState, m.nReduce)
+	if m.numReduce <= 0 {
+		log.Fatal("invalid nReduce number\n")
+	}
+	m.allTasksStates = make([]TaskState, m.numReduce)
 	m.phase = inRedeuce
-	m.taskCh = make(chan Task, m.nReduce)
 	for idx, _ := range m.allTasksStates {
 		m.allTasksStates[idx].state = new
 		m.allTasksStates[idx].workerId = -1
@@ -105,15 +143,15 @@ func (m *Master) AssignATask(args *AskForTaskArgs, reply *AskForTaskReply) error
 	task := <-m.taskCh
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
-	m.allTasksStates[task.id].startTime = time.Now()
-	m.allTasksStates[task.id].state = running
-	m.allTasksStates[task.id].workerId = args.WorkerId
+	m.allTasksStates[task.Id].startTime = time.Now()
+	m.allTasksStates[task.Id].state = running
+	m.allTasksStates[task.Id].workerId = args.WorkerId
 	if m.phase == inMap {
-		reply.MapOrReduce = inMap
-		debugPrintln("master received rpc from worker=%v, assigning a map task, filename=%v\n", args.WorkerId, task.fileName)
+		debugPrintln("master received request task rpc from worker=%v, assigning a map task, taskId=%v, filename=%v\n",
+			args.WorkerId, task.Id, task.FileName)
 	} else {
-		reply.MapOrReduce = inRedeuce
-		debugPrintln("master received rpc from worker=%v, assigning a reduce task", args.WorkerId)
+		debugPrintln("master received request task rpc from worker=%v, assigning a reduce task, taskId=%v",
+			args.WorkerId, task.Id)
 	}
 	reply.Task = task
 
@@ -133,11 +171,13 @@ func (m *Master) updateTaskProgress() {
 			// reduce don't need a filename
 			var task Task
 			if m.phase == inMap {
-				task.fileName = m.files[idx]
+				task.FileName = m.files[idx]
+				task.Phase = inMap
 			} else {
-				task.fileName = "reduce"
+				task.FileName = "reduce"
+				task.Phase = inRedeuce
 			}
-			task.id = idx
+			task.Id = idx
 			m.taskCh <- task
 			m.allTasksStates[idx].state = inQueue
 			allTaskDone = false
@@ -149,17 +189,19 @@ func (m *Master) updateTaskProgress() {
 			// check timeout
 			if time.Now().Sub(taskState.startTime) >= timeout {
 				// add the task back to channel and mark it as in queue
-				debugPrintln("task_id=%v has timed out, original worker_id=%v\n", idx, taskState.workerId)
+				debugPrintln("task_id=%v has timed out, worker_id=%v\n", idx, taskState.workerId)
 				m.allTasksStates[idx].workerId = -1
 				m.allTasksStates[idx].state = inQueue
 				// task's filename and id remains unchanged
 				var task Task
 				if m.phase == inMap {
-					task.fileName = m.files[idx]
+					task.FileName = m.files[idx]
+					task.Phase = inMap
 				} else {
-					task.fileName = "reduce"
+					task.FileName = "reduce"
+					task.Phase = inRedeuce
 				}
-				task.id = idx
+				task.Id = idx
 				m.taskCh <- task
 			}
 
@@ -178,6 +220,13 @@ func (m *Master) updateTaskProgress() {
 	}
 }
 
+func (m *Master) sleepAndUpdate(sleepTime time.Duration) {
+	for !m.Done() {
+		go m.updateTaskProgress()
+		time.Sleep(sleepTime)
+	}
+}
+
 //
 // create a Master.
 // main/mrmaster.go calls this function.
@@ -187,12 +236,12 @@ func MakeMaster(files []string, nReduce int) *Master {
 	m := Master{}
 	// Your code here.
 	m.mtx = sync.Mutex{}
-	m.nReduce = nReduce
+	m.numReduce = nReduce
 	m.files = files
 	m.nextWorkerId = 0
 	m.allDone = false
 	m.initMap()
-
+	go m.sleepAndUpdate(updateProgressInterval)
 	m.server()
 	debugPrintln("master is up\n")
 	return &m

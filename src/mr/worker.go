@@ -1,10 +1,13 @@
 package mr
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io/ioutil"
 	"log"
 	"net/rpc"
+	"os"
 )
 
 //
@@ -38,19 +41,101 @@ func Worker(mapf func(string, string) []KeyValue,
 	for {
 		t := w.askForTask()
 		w.executeTask(t)
-		w.done()
 	}
-
 }
 
 type WORKER struct {
-	id      int
-	mapf    func(string, string) []KeyValue
-	redecef func(string, []string) string
+	id        int
+	mapf      func(string, string) []KeyValue
+	redecef   func(string, []string) string
+	numMap    int
+	numReduce int
+}
+
+func (w *WORKER) doMapTask(t Task) {
+	file, err := os.Open(t.FileName)
+	if err != nil {
+		log.Fatalf("unable to open file=%v", t.FileName)
+	}
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("cannot read file=%v", t.FileName)
+	}
+	file.Close()
+	kva := w.mapf(t.FileName, string(content))
+
+	reduceTasks := make([][]KeyValue, w.numReduce)
+
+	for _, kv := range kva {
+		reduceTaskIndex := ihash(kv.Key) % w.numReduce
+		// add the kv pair to the cooresponding reduce task
+		reduceTasks[reduceTaskIndex] = append(reduceTasks[reduceTaskIndex], kv)
+	}
+
+	// create intermediate file for each map task output
+	for reduceTaskIndex, kva := range reduceTasks {
+		// A reasonable naming convention for intermediate files is mr-X-Y,
+		// where X is the Map task number, and Y is the reduce task number.
+		intermediateFileName := fmt.Sprintf("mr-%v-%v", t.Id, reduceTaskIndex)
+		intermediateFile, err := os.Create(intermediateFileName)
+		if err != nil {
+			log.Fatalf("can not create intermediate file=%v\n", intermediateFileName)
+		}
+		enc := json.NewEncoder(intermediateFile)
+		for _, kv := range kva {
+			err := enc.Encode(&kv)
+			if err != nil {
+				log.Fatalf("can not encode kva=%v for file=%v", kv, intermediateFileName)
+			}
+		}
+	}
+	w.done(t)
+}
+
+func (w *WORKER) doReduceTask(t Task) {
+	// aggregate across all map results
+	kvMap := make(map[string][]string)
+	for i := 0; i < w.numMap; i++ {
+		intermediateFileName := fmt.Sprintf("mr-%v-%v", i, t.Id)
+		intermediateFile, err := os.Open(intermediateFileName)
+		if err != nil {
+			// if the intermediate file does not exist, it's ok
+			continue
+		}
+		dec := json.NewDecoder(intermediateFile)
+		for {
+			var kv KeyValue
+			if err := dec.Decode(&kv); err != nil {
+				break
+			}
+			kvMap[kv.Key] = append(kvMap[kv.Key], kv.Value)
+		}
+	}
+	for k, v := range kvMap {
+		// output in files named mr-out-X, one for each reduce task
+		outputFileName := fmt.Sprintf("mr-out-%d", t.Id)
+		file, err := os.OpenFile(outputFileName, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("error when openning output file=%v, err=%v\n", outputFileName, err)
+		}
+		defer file.Close()
+
+		content := fmt.Sprintf("%v %v", k, w.redecef(k, v))
+		bytes := []byte(content)
+		_, err = file.Write(bytes)
+		if err != nil {
+			log.Fatalf("can not write to output file=%v, err=%v", outputFileName, err)
+		}
+	}
+	w.done(t)
 }
 
 func (w *WORKER) executeTask(t Task) {
-
+	if t.Phase == inMap {
+		w.doMapTask(t)
+	} else {
+		w.doReduceTask(t)
+	}
 }
 
 func (w *WORKER) askForTask() Task {
@@ -64,27 +149,44 @@ func (w *WORKER) askForTask() Task {
 	if !success {
 		log.Fatal("Unable to ask master for a task\n")
 	}
-	if reply.MapOrReduce == inMap {
-		debugPrintln("worker=%v got map task from master, fileName=%v, taskID=%v", w.id, reply.Task.fileName, reply.Task.id)
+	if reply.Task.Phase == inMap {
+		debugPrintln("worker=%v got map task from master, fileName=%v, taskID=%v", w.id, reply.Task.FileName, reply.Task.Id)
 	} else {
-		debugPrintln("worker=%v got reduce task from master, taskID=%v", w.id, reply.Task.id)
+		debugPrintln("worker=%v got reduce task from master, taskID=%v", w.id, reply.Task.Id)
 	}
 	return reply.Task
 }
 
-func (w *WORKER) done() {
+func (w *WORKER) done(t Task) {
+	args := DoneTaskArgs{}
+	reply := DoneTaskReply{}
+	args.TaskId = t.Id
+	args.WorkerId = w.id
+	success := call("Master.DoneTask", &args, &reply)
+	if !success {
+		log.Fatalf("unable to send rpc of DoneTask to master form worker=%v\n", w.id)
+	}
 
+	if t.Phase == inMap {
+		debugPrintln("worker=%v has done map task, reply=%v\n", w.id, reply.Reply)
+	} else {
+		debugPrintln("worker=%v has done reduce task, reply=%v\n", w.id, reply.Reply)
+	}
 }
 
 func (w *WORKER) register() {
 	args := RegisterWorkerArgs{}
 	reply := RegisterWorkerReply{}
-
+	args.S = "register"
 	success := call("Master.RegisterWorker", &args, &reply)
 	if !success {
 		log.Fatal("Unable to register a worker\n")
 	}
-	debugPrintln("registering a new worker, id=%v\n", reply)
+	w.id = reply.WorkerID
+	w.numMap = reply.NumMap
+	w.numReduce = reply.NumReduce
+	debugPrintln("registering a new worker, id=%v, numMap=%v, numReduce=%v\n",
+		reply.WorkerID, reply.NumMap, reply.NumReduce)
 }
 
 //

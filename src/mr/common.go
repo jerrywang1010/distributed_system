@@ -32,9 +32,10 @@ type TaskState struct {
 }
 
 type Task struct {
-	fileName string
+	FileName string
 	// index into the master.allTaskStates[], maxID = len(files) - 1 in map, maxID = nReduce - 1 in reduce
-	id int
+	Id    int
+	Phase int
 }
 
 func debugPrintln(format string, v ...interface{}) {
