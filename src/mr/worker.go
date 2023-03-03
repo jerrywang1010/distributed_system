@@ -54,6 +54,7 @@ type WORKER struct {
 
 func (w *WORKER) doMapTask(t Task) {
 	file, err := os.Open(t.FileName)
+	defer file.Close()
 	if err != nil {
 		log.Fatalf("unable to open file=%v", t.FileName)
 	}
@@ -61,7 +62,6 @@ func (w *WORKER) doMapTask(t Task) {
 	if err != nil {
 		log.Fatalf("cannot read file=%v", t.FileName)
 	}
-	file.Close()
 	kva := w.mapf(t.FileName, string(content))
 
 	reduceTasks := make([][]KeyValue, w.numReduce)
@@ -98,6 +98,7 @@ func (w *WORKER) doReduceTask(t Task) {
 	for i := 0; i < w.numMap; i++ {
 		intermediateFileName := fmt.Sprintf("mr-%v-%v", i, t.Id)
 		intermediateFile, err := os.Open(intermediateFileName)
+		defer intermediateFile.Close()
 		if err != nil {
 			// if the intermediate file does not exist, it's ok
 			continue
@@ -114,13 +115,13 @@ func (w *WORKER) doReduceTask(t Task) {
 	for k, v := range kvMap {
 		// output in files named mr-out-X, one for each reduce task
 		outputFileName := fmt.Sprintf("mr-out-%d", t.Id)
-		file, err := os.OpenFile(outputFileName, os.O_APPEND|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(outputFileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		defer file.Close()
 		if err != nil {
 			log.Fatalf("error when openning output file=%v, err=%v\n", outputFileName, err)
 		}
-		defer file.Close()
 
-		content := fmt.Sprintf("%v %v", k, w.redecef(k, v))
+		content := fmt.Sprintf("%v %v\n", k, w.redecef(k, v))
 		bytes := []byte(content)
 		_, err = file.Write(bytes)
 		if err != nil {

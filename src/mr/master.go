@@ -112,7 +112,7 @@ func (m *Master) initMap() {
 	debugPrintln("initializing master, marking all map task as not started\n")
 	m.allTasksStates = make([]TaskState, len(m.files))
 	m.phase = inMap
-	if len(m.files) <= m.numReduce {
+	if len(m.files) >= m.numReduce {
 		m.taskCh = make(chan Task, len(m.files))
 	} else {
 		m.taskCh = make(chan Task, m.numReduce)
@@ -133,13 +133,14 @@ func (m *Master) initReduce() {
 	}
 	m.allTasksStates = make([]TaskState, m.numReduce)
 	m.phase = inRedeuce
-	for idx, _ := range m.allTasksStates {
+	for idx := range m.allTasksStates {
 		m.allTasksStates[idx].state = new
 		m.allTasksStates[idx].workerId = -1
 	}
 }
 
 func (m *Master) AssignATask(args *AskForTaskArgs, reply *AskForTaskReply) error {
+	debugPrintln("master received request task rpc from worker=%v", args.WorkerId)
 	task := <-m.taskCh
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
@@ -147,11 +148,11 @@ func (m *Master) AssignATask(args *AskForTaskArgs, reply *AskForTaskReply) error
 	m.allTasksStates[task.Id].state = running
 	m.allTasksStates[task.Id].workerId = args.WorkerId
 	if m.phase == inMap {
-		debugPrintln("master received request task rpc from worker=%v, assigning a map task, taskId=%v, filename=%v\n",
-			args.WorkerId, task.Id, task.FileName)
+		debugPrintln("assigning a map task, taskId=%v, filename=%v\n",
+			task.Id, task.FileName)
 	} else {
-		debugPrintln("master received request task rpc from worker=%v, assigning a reduce task, taskId=%v",
-			args.WorkerId, task.Id)
+		debugPrintln("assigning a reduce task, taskId=%v",
+			task.Id)
 	}
 	reply.Task = task
 
