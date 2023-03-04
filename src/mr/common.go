@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const DEBUG = true
+const DEBUG = false
 
 // the overall progress of map reduce
 const (

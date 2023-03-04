@@ -27,7 +27,6 @@ type Master struct {
 	allDone        bool
 	allTasksStates []TaskState
 	taskCh         chan Task
-	done           bool
 	phase          int
 	numReduce      int
 	numMap         int
@@ -214,9 +213,11 @@ func (m *Master) updateTaskProgress() {
 	}
 	if allTaskDone {
 		if m.phase == inMap {
+			debugPrintln("all map tasks done, initializing reduce tasks\n")
 			m.initReduce()
 		} else {
-			m.done = true
+			debugPrintln("all tasks done, setting done flag to true\n")
+			m.allDone = true
 		}
 	}
 }

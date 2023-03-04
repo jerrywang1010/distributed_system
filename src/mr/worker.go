@@ -116,7 +116,6 @@ func (w *WORKER) doReduceTask(t Task) {
 		// output in files named mr-out-X, one for each reduce task
 		outputFileName := fmt.Sprintf("mr-out-%d", t.Id)
 		file, err := os.OpenFile(outputFileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-		defer file.Close()
 		if err != nil {
 			log.Fatalf("error when openning output file=%v, err=%v\n", outputFileName, err)
 		}
@@ -127,6 +126,7 @@ func (w *WORKER) doReduceTask(t Task) {
 		if err != nil {
 			log.Fatalf("can not write to output file=%v, err=%v", outputFileName, err)
 		}
+		file.Close()
 	}
 	w.done(t)
 }
