@@ -18,10 +18,26 @@ package raft
 //
 
 import (
+	"log"
+	"math/rand"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/jerrywang1010/6.824/src/labrpc"
+)
+
+type Role int
+
+const (
+	Leader    Role = 0
+	Candidate Role = 1
+	Follower  Role = 2
+)
+
+const (
+	ElectionTimeOut    = 400 * time.Millisecond
+	AppendEntryTimeOut = 100 * time.Millisecond
 )
 
 // import "bytes"
@@ -44,6 +60,11 @@ type ApplyMsg struct {
 	CommandIndex int
 }
 
+type logEntry struct {
+	command interface{}
+	term    int
+}
+
 //
 // A Go object implementing a single Raft peer.
 //
@@ -57,17 +78,28 @@ type Raft struct {
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
+	applyCh       chan ApplyMsg
+	role          Role
+	term          int
+	electionTimer *time.Timer
+	currentTerm   int
+	votedFor      int
+	log           []logEntry
 
+	commitIndex int // index of the highest logEntry known to be committed
+	lastApplied int // index of the highest logEntry applied to the statemachine
+
+	// only on leaders
+	nextIndex         []int // for each server, index of the next log entry to send to that server
+	matchIndex        []int // for each server, index of the highest log entry known to be replicated
+	appendEntryTimers []*time.Timer
 }
 
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
-
-	var term int
-	var isleader bool
 	// Your code here (2A).
-	return term, isleader
+	return rf.term, rf.role == Leader
 }
 
 //
@@ -108,20 +140,31 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-//
-// example RequestVote RPC arguments structure.
-// field names must start with capital letters!
-//
-type RequestVoteArgs struct {
-	// Your data here (2A, 2B).
+func (rf *Raft) isLogUpToDate(lastLogTerm int, lastLogIndex int) bool {
+	myLastLogTerm := rf.log[len(rf.log)-1].term
+	myLastLogIndex := len(rf.log) - 1
+	return lastLogTerm > myLastLogTerm ||
+		(lastLogTerm == myLastLogTerm && lastLogIndex >= myLastLogIndex)
 }
 
-//
-// example RequestVote RPC reply structure.
-// field names must start with capital letters!
-//
-type RequestVoteReply struct {
-	// Your data here (2A).
+func (rf *Raft) changeRole(role Role) {
+	rf.role = role
+	switch role {
+	case Follower:
+		DPrintf("changing node %v to Follower", rf.me)
+	case Candidate:
+	case Leader:
+	default:
+		log.Fatalf("unknown role = %v\n", role)
+	}
+}
+
+func (rf *Raft) resetElectionTimer() {
+	rand.Seed(time.Now().UnixNano())
+	// a random time interval between 0 and ElectionTimeOut(400ms)
+	randomTimeout := time.Duration(rand.Int63()) % ElectionTimeOut
+	rf.electionTimer.Reset(ElectionTimeOut + randomTimeout)
+	DPrintf("reset election timer for node=%v, timeout=%v\n", rf.me, ElectionTimeOut+randomTimeout)
 }
 
 //
@@ -129,6 +172,35 @@ type RequestVoteReply struct {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	DPrintf("node %v received RequestVote RPC from node %v\n", args.CanadidateId, rf.me)
+	reply.Term = rf.term
+	if rf.term > args.Term {
+		reply.VoteGranted = false
+		return
+	} else if rf.votedFor == args.CanadidateId { // if already voted
+		reply.VoteGranted = true
+		return
+	} else if rf.votedFor != -1 { // voted for someone else
+		reply.VoteGranted = false
+		return
+	}
+	// hasn't voted, check if log is up to date
+	if args.Term > rf.term {
+		rf.currentTerm = args.Term
+		rf.changeRole(Follower)
+	}
+	if rf.isLogUpToDate(args.LastLogTerm, args.LastLogIndex) {
+		rf.votedFor = args.CanadidateId
+		rf.changeRole(Follower)
+		rf.resetElectionTimer()
+		reply.VoteGranted = true
+		DPrintf("node=%v voted for %v for the first time\n", args.CanadidateId, rf.me)
+		return
+	}
+	// no vote
+	reply.VoteGranted = false
 }
 
 //
@@ -229,6 +301,18 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.me = me
 
 	// Your initialization code here (2A, 2B, 2C).
+	rf.role = Follower
+	rf.applyCh = applyCh
+	rf.currentTerm = 0
+	rf.votedFor = -1
+	rf.log = make([]logEntry, 1)
+	rf.commitIndex = 0
+	rf.lastApplied = 0
+	rf.nextIndex = make([]int, len(peers))
+	rf.matchIndex = make([]int, len(peers))
+	rf.electionTimer = time.NewTimer(0)
+	// reset election timeout to a new random value
+	rf.resetElectionTimer()
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
