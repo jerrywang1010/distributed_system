@@ -21,3 +21,17 @@ type RequestVoteReply struct {
 	Term        int
 	VoteGranted bool
 }
+
+type AppendEntryArgs struct {
+	Term              int
+	LeaderID          int
+	PrevLogIndex      int
+	PrevLogTerm       int
+	Entries           []logEntry
+	LeaderCommitIndex int
+}
+
+type AppendEntryReply struct {
+	Term    int
+	Success bool
+}

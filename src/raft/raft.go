@@ -18,8 +18,6 @@ package raft
 //
 
 import (
-	"log"
-	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -140,102 +138,6 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-func (rf *Raft) isLogUpToDate(lastLogTerm int, lastLogIndex int) bool {
-	myLastLogTerm := rf.log[len(rf.log)-1].term
-	myLastLogIndex := len(rf.log) - 1
-	return lastLogTerm > myLastLogTerm ||
-		(lastLogTerm == myLastLogTerm && lastLogIndex >= myLastLogIndex)
-}
-
-func (rf *Raft) changeRole(role Role) {
-	rf.role = role
-	switch role {
-	case Follower:
-		DPrintf("changing node %v to Follower", rf.me)
-	case Candidate:
-	case Leader:
-	default:
-		log.Fatalf("unknown role = %v\n", role)
-	}
-}
-
-func (rf *Raft) resetElectionTimer() {
-	rand.Seed(time.Now().UnixNano())
-	// a random time interval between 0 and ElectionTimeOut(400ms)
-	randomTimeout := time.Duration(rand.Int63()) % ElectionTimeOut
-	rf.electionTimer.Reset(ElectionTimeOut + randomTimeout)
-	DPrintf("reset election timer for node=%v, timeout=%v\n", rf.me, ElectionTimeOut+randomTimeout)
-}
-
-//
-// example RequestVote RPC handler.
-//
-func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// Your code here (2A, 2B).
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	DPrintf("node %v received RequestVote RPC from node %v\n", args.CanadidateId, rf.me)
-	reply.Term = rf.term
-	if rf.term > args.Term {
-		reply.VoteGranted = false
-		return
-	} else if rf.votedFor == args.CanadidateId { // if already voted
-		reply.VoteGranted = true
-		return
-	} else if rf.votedFor != -1 { // voted for someone else
-		reply.VoteGranted = false
-		return
-	}
-	// hasn't voted, check if log is up to date
-	if args.Term > rf.term {
-		rf.currentTerm = args.Term
-		rf.changeRole(Follower)
-	}
-	if rf.isLogUpToDate(args.LastLogTerm, args.LastLogIndex) {
-		rf.votedFor = args.CanadidateId
-		rf.changeRole(Follower)
-		rf.resetElectionTimer()
-		reply.VoteGranted = true
-		DPrintf("node=%v voted for %v for the first time\n", args.CanadidateId, rf.me)
-		return
-	}
-	// no vote
-	reply.VoteGranted = false
-}
-
-//
-// example code to send a RequestVote RPC to a server.
-// server is the index of the target server in rf.peers[].
-// expects RPC arguments in args.
-// fills in *reply with RPC reply, so caller should
-// pass &reply.
-// the types of the args and reply passed to Call() must be
-// the same as the types of the arguments declared in the
-// handler function (including whether they are pointers).
-//
-// The labrpc package simulates a lossy network, in which servers
-// may be unreachable, and in which requests and replies may be lost.
-// Call() sends a request and waits for a reply. If a reply arrives
-// within a timeout interval, Call() returns true; otherwise
-// Call() returns false. Thus Call() may not return for a while.
-// A false return can be caused by a dead server, a live server that
-// can't be reached, a lost request, or a lost reply.
-//
-// Call() is guaranteed to return (perhaps after a delay) *except* if the
-// handler function on the server side does not return.  Thus there
-// is no need to implement your own timeouts around Call().
-//
-// look at the comments in ../labrpc/labrpc.go for more details.
-//
-// if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
-// that the caller passes the address of the reply struct with &, not
-// the struct itself.
-//
-func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
-	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	return ok
-}
 
 //
 // the service using Raft (e.g. a k/v server) wants to start
@@ -282,6 +184,14 @@ func (rf *Raft) killed() bool {
 	return z == 1
 }
 
+func (rf *Raft) waitForElection() {
+	for {
+		<- rf.electionTimer.C
+		
+	}
+}
+
+
 //
 // the service or tester wants to create a Raft server. the ports
 // of all the Raft servers (including this one) are in peers[]. this
@@ -316,6 +226,10 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
+
+
+	// spawn a go routine to listen for append entry and start election if timeout
+	
 
 	return rf
 }
