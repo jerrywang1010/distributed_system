@@ -34,8 +34,8 @@ const (
 )
 
 const (
-	ElectionTimeOut    = 400 * time.Millisecond
-	AppendEntryTimeOut = 100 * time.Millisecond
+	ElectionTimeout    = 400 * time.Millisecond
+	AppendEntryTimeout = 100 * time.Millisecond
 )
 
 // import "bytes"
@@ -138,7 +138,6 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-
 //
 // the service using Raft (e.g. a k/v server) wants to start
 // agreement on the next command to be appended to Raft's log. if this
@@ -184,14 +183,6 @@ func (rf *Raft) killed() bool {
 	return z == 1
 }
 
-func (rf *Raft) waitForElection() {
-	for {
-		<- rf.electionTimer.C
-		
-	}
-}
-
-
 //
 // the service or tester wants to create a Raft server. the ports
 // of all the Raft servers (including this one) are in peers[]. this
@@ -223,13 +214,16 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.electionTimer = time.NewTimer(0)
 	// reset election timeout to a new random value
 	rf.resetElectionTimer()
+	rf.appendEntryTimers = make([]*time.Timer, len(peers))
+	for i := range rf.appendEntryTimers {
+		rf.appendEntryTimers[i] = time.NewTimer(AppendEntryTimeout)
+	}
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
-
-
-	// spawn a go routine to listen for append entry and start election if timeout
-	
+	// spawn a go routine to listen for append entry and wait for election if timeout
+	go rf.waitForElectionTimeout()
+	go rf.waitForAppendEntryTimeout()
 
 	return rf
 }

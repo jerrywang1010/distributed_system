@@ -1,5 +1,35 @@
 package raft
 
+//
+// example code to send a RequestVote RPC to a server.
+// server is the index of the target server in rf.peers[].
+// expects RPC arguments in args.
+// fills in *reply with RPC reply, so caller should
+// pass &reply.
+// the types of the args and reply passed to Call() must be
+// the same as the types of the arguments declared in the
+// handler function (including whether they are pointers).
+//
+// The labrpc package simulates a lossy network, in which servers
+// may be unreachable, and in which requests and replies may be lost.
+// Call() sends a request and waits for a reply. If a reply arrives
+// within a timeout interval, Call() returns true; otherwise
+// Call() returns false. Thus Call() may not return for a while.
+// A false return can be caused by a dead server, a live server that
+// can't be reached, a lost request, or a lost reply.
+//
+// Call() is guaranteed to return (perhaps after a delay) *except* if the
+// handler function on the server side does not return.  Thus there
+// is no need to implement your own timeouts around Call().
+//
+// look at the comments in ../labrpc/labrpc.go for more details.
+//
+// if you're having trouble getting RPC to work, check that you've
+// capitalized all field names in structs passed over RPC, and
+// that the caller passes the address of the reply struct with &, not
+// the struct itself.
+//
+
 import (
 	"log"
 	"math/rand"
@@ -14,14 +44,13 @@ func (rf *Raft) isLogUpToDate(lastLogTerm int, lastLogIndex int) bool {
 }
 
 func (rf *Raft) changeRole(role Role) {
+	DPrintf("changing node %v from %v to %v", rf.me, rf.role, role)
 	rf.role = role
 	switch role {
 	case Follower:
-		DPrintf("changing node %v from %v to Follower", rf.me, rf.role)
 	case Candidate:
 		rf.term++
 		rf.votedFor = rf.me
-		DPrintf("changing node %v from %v to Candidate", rf.me, rf.role)
 	case Leader:
 		// reset nextIndex and matchIndex
 		rf.nextIndex = make([]int, len(rf.peers))
@@ -29,18 +58,24 @@ func (rf *Raft) changeRole(role Role) {
 		for i := range rf.nextIndex {
 			rf.nextIndex[i] = len(rf.log)
 		}
-		DPrintf("changing node %v from %v to Leader", rf.me, rf.role)
 	default:
 		log.Fatalf("unknown role = %v\n", role)
 	}
 }
 
 func (rf *Raft) resetElectionTimer() {
+	if !rf.electionTimer.Stop() {
+		select {
+		case <-rf.electionTimer.C:
+		default:
+		}
+	}
+	// randomize election timeout
 	rand.Seed(time.Now().UnixNano())
 	// a random time interval between 0 and ElectionTimeOut(400ms)
-	randomTimeout := time.Duration(rand.Int63()) % ElectionTimeOut
-	rf.electionTimer.Reset(ElectionTimeOut + randomTimeout)
-	DPrintf("reset election timer for node=%v, timeout=%v\n", rf.me, ElectionTimeOut+randomTimeout)
+	randomTimeout := time.Duration(rand.Int63()) % ElectionTimeout
+	rf.electionTimer.Reset(ElectionTimeout + randomTimeout)
+	DPrintf("reset election timer for node=%v, timeout=%v\n", rf.me, ElectionTimeout+randomTimeout)
 }
 
 //
@@ -96,7 +131,7 @@ func (rf *Raft) startElection() {
 		LastLogIndex: len(rf.log) - 1,
 		LastLogTerm:  rf.log[len(rf.log)-1].term,
 	}
-
+	// vote for itself
 	voteGranted := 1
 	// TODO: put this into a go routine and
 	// check if role is still candidiate before promote to leader
@@ -121,42 +156,23 @@ func (rf *Raft) startElection() {
 			}
 		}
 	}
-	if rf.role == Leader {
-		// start heartbeat
-		rf.sendHearbeatToPeers()
-	}
+
+	// if me is a leader, the next time AppendEntryTimer fires, it will start heartbeat
+	// if rf.role == Leader {
+	// 	rf.mu.Unlock()
+	// 	// start heartbeat
+	// 	rf.sendHearbeatToPeers()
+	// }
 }
 
-//
-// example code to send a RequestVote RPC to a server.
-// server is the index of the target server in rf.peers[].
-// expects RPC arguments in args.
-// fills in *reply with RPC reply, so caller should
-// pass &reply.
-// the types of the args and reply passed to Call() must be
-// the same as the types of the arguments declared in the
-// handler function (including whether they are pointers).
-//
-// The labrpc package simulates a lossy network, in which servers
-// may be unreachable, and in which requests and replies may be lost.
-// Call() sends a request and waits for a reply. If a reply arrives
-// within a timeout interval, Call() returns true; otherwise
-// Call() returns false. Thus Call() may not return for a while.
-// A false return can be caused by a dead server, a live server that
-// can't be reached, a lost request, or a lost reply.
-//
-// Call() is guaranteed to return (perhaps after a delay) *except* if the
-// handler function on the server side does not return.  Thus there
-// is no need to implement your own timeouts around Call().
-//
-// look at the comments in ../labrpc/labrpc.go for more details.
-//
-// if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
-// that the caller passes the address of the reply struct with &, not
-// the struct itself.
-//
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
+}
+
+func (rf *Raft) waitForElectionTimeout() {
+	for !rf.killed() {
+		<-rf.electionTimer.C
+		rf.startElection()
+	}
 }

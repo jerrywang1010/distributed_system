@@ -1,14 +1,42 @@
 package raft
 
-func (rf *Raft) sendHearbeatToPeers() {
-	args := AppendEntryArgs{}
-	reply := AppendEntryReply{}
-	args.Term = -1
-	for i := range rf.peers {
-		if i != rf.me {
-			go rf.sendAppendEntries(i, &args, &reply)
+// spawn a go routine for each peer and wait for append entry timeout and send append entry
+func (rf *Raft) waitForAppendEntryTimeout() {
+	for !rf.killed() {
+		for i := range rf.peers {
+			if i == rf.me {
+				continue
+			}
+			select {
+			case <-rf.appendEntryTimers[i].C:
+				go rf.sendHearbeatToPeer(i)
+			}
 		}
 	}
+}
+
+func (rf *Raft) sendHearbeatToPeer(i int) {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	rf.resetAppendEntryTimerForPeer(i)
+	if rf.role != Leader {
+		return
+	}
+	args := AppendEntryArgs{}
+	reply := AppendEntryReply{}
+	args.Term = rf.term
+	args.IsHeartBeat = true
+	rf.sendAppendEntries(i, &args, &reply)
+}
+
+func (rf *Raft) resetAppendEntryTimerForPeer(i int) {
+	if !rf.appendEntryTimers[i].Stop() {
+		select {
+			case <- rf.appendEntryTimers[i].C:
+			default:
+		}
+	}
+	rf.appendEntryTimers[i].Reset(AppendEntryTimeout)
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *AppendEntryReply) bool {
@@ -20,16 +48,29 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *Appe
 func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	DPrintf("node %v recerived AppendEntries RPC from node %v\n", rf.me, args.LeaderID)
-	
-	// 2A
-	rf.changeRole(Follower)
-	rf.resetElectionTimer()
-	if args.Term == -1 {
-		DPrintf("node %v received heartbeat from node %v\n", rf.me, args.LeaderID)
+	if args.Term < rf.term {
+		reply.Success = false
+		reply.Term = rf.term
 		return
 	}
-
+	
+	rf.term = args.Term
+	if rf.role != Follower {
+		rf.changeRole(Follower)
+	}
+	rf.resetElectionTimer()
+	// heartbeat
+	if args.IsHeartBeat == true {
+		DPrintf("node %v received heartbeat from node %v\n", rf.me, args.LeaderID)
+		reply.Success = true
+		reply.Term = rf.term
+		return
+	}
+	DPrintf("node %v recerived AppendEntries RPC from node %v, term=%v\n", 
+			rf.me, args.LeaderID, args.Term)
+	
+	reply.Success = true
+	reply.Term = rf.term		
 	// 2B
 	// reply false if term < currentTerm
 	// if rf.term > args.Term {

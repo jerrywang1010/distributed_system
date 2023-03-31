@@ -29,6 +29,7 @@ type AppendEntryArgs struct {
 	PrevLogTerm       int
 	Entries           []logEntry
 	LeaderCommitIndex int
+	IsHeartBeat       bool
 }
 
 type AppendEntryReply struct {
