@@ -28,10 +28,14 @@ import (
 type Role int
 
 const (
-	Leader    Role = 0
-	Candidate Role = 1
-	Follower  Role = 2
+	Leader Role = iota
+	Candidate
+	Follower
 )
+
+func (r Role) String() string {
+	return [...]string{"Leader", "Candidate", "Follower"}[r]
+}
 
 const (
 	ElectionTimeout    = 400 * time.Millisecond
@@ -59,8 +63,8 @@ type ApplyMsg struct {
 }
 
 type logEntry struct {
-	command interface{}
-	term    int
+	Command interface{}
+	Term    int
 }
 
 //
