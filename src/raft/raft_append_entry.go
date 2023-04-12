@@ -9,7 +9,11 @@ func (rf *Raft) waitForAppendEntryTimeout() {
 			}
 			select {
 			case <-rf.appendEntryTimers[i].C:
-				go rf.sendHearbeatToPeer(i)
+				if !rf.killed() {
+					go rf.sendHearbeatToPeer(i)
+				} else {
+					break
+				}
 			}
 		}
 	}
@@ -18,13 +22,16 @@ func (rf *Raft) waitForAppendEntryTimeout() {
 func (rf *Raft) sendHearbeatToPeer(i int) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	rf.resetAppendEntryTimerForPeer(i)
 	if rf.role != Leader {
 		return
 	}
+	DPrintf("====================leader %v sending heartbeats to node %v, role=%v====================",
+		rf.me, i, rf.currentTerm)
+	defer DPrintf("================================================================================")
+	rf.resetAppendEntryTimerForPeer(i)
 	args := AppendEntryArgs{}
 	reply := AppendEntryReply{}
-	args.Term = rf.term
+	args.Term = rf.currentTerm
 	args.IsHeartBeat = true
 	args.LeaderID = rf.me
 
@@ -60,19 +67,18 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *Appe
 }
 
 func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
-	DPrintf("====================node %v received AppendEntries PRC from %v====================", rf.me, args.LeaderID)
-
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	DPrintf("====================node %v received AppendEntries PRC from %v====================", rf.me, args.LeaderID)
 	defer DPrintf("================================================================================")
-	reply.Term = rf.term
+	reply.Term = rf.currentTerm
 
-	if args.Term < rf.term {
+	if args.Term < rf.currentTerm {
 		reply.Success = false
 		return
 	}
 
-	rf.term = args.Term
+	rf.currentTerm = args.Term
 	if rf.role != Follower {
 		rf.changeRole(Follower)
 	}
@@ -84,18 +90,18 @@ func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 	}
 
 	reply.Success = true
-	reply.Term = rf.term
+	reply.Term = rf.currentTerm
 	// 2B
 	// reply false if term < currentTerm
-	// if rf.term > args.Term {
+	// if rf.currentTerm > args.Term {
 	// 	reply.Success = false
-	// 	reply.Term = rf.term
+	// 	reply.Term = rf.currentTerm
 	// 	return
 	// }
 	// // reply false if log doesn't contain a log entry at prevLogIndex whose term matches preLogTerm
 	// if len(rf.log) > args.PrevLogIndex && rf.log[args.PrevLogIndex].term != args.PrevLogTerm {
 	// 	reply.Success = false
-	// 	reply.Term = rf.term
+	// 	reply.Term = rf.currentTerm
 	// 	return
 	// }
 }

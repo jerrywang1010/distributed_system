@@ -39,7 +39,7 @@ func (r Role) String() string {
 
 const (
 	ElectionTimeout    = 400 * time.Millisecond
-	AppendEntryTimeout = 100 * time.Millisecond
+	AppendEntryTimeout = 200 * time.Millisecond
 )
 
 // import "bytes"
@@ -82,7 +82,6 @@ type Raft struct {
 	// state a Raft server must maintain.
 	applyCh       chan ApplyMsg
 	role          Role
-	term          int
 	electionTimer *time.Timer
 	currentTerm   int
 	votedFor      int
@@ -101,7 +100,9 @@ type Raft struct {
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
 	// Your code here (2A).
-	return rf.term, rf.role == Leader
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	return rf.currentTerm, rf.role == Leader
 }
 
 //

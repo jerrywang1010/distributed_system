@@ -49,8 +49,8 @@ func (rf *Raft) changeRole(role Role) {
 	switch role {
 	case Follower:
 	case Candidate:
-		rf.term++
-		rf.votedFor = rf.me
+		rf.currentTerm++
+		DPrintf("term=%v", rf.currentTerm)
 	case Leader:
 		// reset nextIndex and matchIndex
 		rf.nextIndex = make([]int, len(rf.peers))
@@ -83,12 +83,13 @@ func (rf *Raft) resetElectionTimer() {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
-	DPrintf("====================node %v received RequestVote PRC from %v====================", rf.me, args.CanadidateId)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	DPrintf("====================node %v received RequestVote PRC from %v for term %v====================",
+		rf.me, args.CanadidateId, args.Term)
 	defer DPrintf("================================================================================")
-	reply.Term = rf.term
-	if rf.term > args.Term {
+	reply.Term = rf.currentTerm
+	if rf.currentTerm > args.Term {
 		reply.VoteGranted = false
 		DPrintf("node %v rejected vote for node %v because of higher term\n", rf.me, args.CanadidateId)
 		return
@@ -104,9 +105,11 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		}
 	}
 	// electing a leader for a new term
-	if args.Term > rf.term {
+	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
-		rf.changeRole(Follower)
+		if rf.role != Follower {
+			rf.changeRole(Follower)
+		}
 		rf.votedFor = -1
 		// rf.resetElectionTimer()
 	}
@@ -116,9 +119,9 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 			rf.changeRole(Follower)
 		}
 
-		rf.resetElectionTimer()
 		reply.VoteGranted = true
-		DPrintf("node %v voted for %v for the first time\n", rf.me, args.CanadidateId)
+		DPrintf("node %v voted for %v for the first time in this term", rf.me, args.CanadidateId)
+		rf.resetElectionTimer()
 		return
 	}
 	// no vote
@@ -127,27 +130,29 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 }
 
 func (rf *Raft) startElection() {
-	DPrintf("====================node %v started election, role=%v====================", rf.me, rf.role)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	DPrintf("====================node %v started election, role=%v====================", rf.me, rf.role)
 	defer DPrintf("================================================================================")
 	if rf.role == Leader {
 		DPrintf("node %v is a leader, skipping this election\n", rf.me)
 		return
 	}
 	rf.changeRole(Candidate)
-	rf.resetElectionTimer()
+	rf.votedFor = rf.me
+	// rf.resetElectionTimer()
 	args := RequestVoteArgs{
-		Term:         rf.term,
+		Term:         rf.currentTerm,
 		CanadidateId: rf.me,
 		LastLogIndex: len(rf.log) - 1,
 		LastLogTerm:  rf.log[len(rf.log)-1].Term,
 	}
+	// vote for itself
+	replyCh := make(chan RequestVoteReply, len(rf.peers))
+	replyCh <- RequestVoteReply{Term: rf.currentTerm, VoteGranted: true}
 	// unlock as while sending request vote, it might receive other rpc and change state
 	rf.mu.Unlock()
-	// vote for itself
-	voteCh := make(chan bool, len(rf.peers))
-	voteCh <- true
+
 	// check if role is still candidiate before promote to leader
 	for i := range rf.peers {
 		if i != rf.me {
@@ -155,22 +160,11 @@ func (rf *Raft) startElection() {
 				var reply RequestVoteReply
 				ok := rf.sendRequestVote(peer, &args, &reply)
 				if ok {
-					voteCh <- reply.VoteGranted
-					if reply.Term > rf.term { // me shouldn't be leader
-						rf.mu.Lock()
-						// check term again after acquring lock
-						if reply.Term > rf.currentTerm {
-							rf.currentTerm = reply.Term
-							DPrintf("node %v received reply with term %v, convert back to follower",
-								rf.me, reply.Term)
-							rf.changeRole(Follower)
-						}
-						rf.mu.Unlock()
-					}
+					replyCh <- reply
 				} else {
 					DPrintf("node %v can't reach peer %v to send request vote rpc",
 						rf.me, peer)
-					voteCh <- false
+					replyCh <- RequestVoteReply{Term: 0, VoteGranted: false}
 				}
 			}(i)
 		}
@@ -182,13 +176,21 @@ func (rf *Raft) startElection() {
 		votesReceived := 0
 		votesGranted := 0
 		for {
-			v := <-voteCh
+			reply := <-replyCh
 			votesReceived++
-			if v {
+			if reply.Term > rf.currentTerm {
+				rf.currentTerm = reply.Term
+				DPrintf("node %v received reply with term %v, convert back to follower",
+					rf.me, reply.Term)
+				rf.changeRole(Follower)
+				break
+			}
+			if reply.VoteGranted {
 				votesGranted++
 			}
 			if votesGranted > len(rf.peers)/2 { // received majority of votes
-				DPrintf("node %v received %v votes, became leader", rf.me, votesGranted)
+				DPrintf("node %v received %v votes, became leader for term=%v",
+					rf.me, votesGranted, rf.currentTerm)
 				rf.changeRole(Leader)
 				break
 			} else if votesReceived == len(rf.peers) { // all peers responded, not enough votes
@@ -200,11 +202,14 @@ func (rf *Raft) startElection() {
 	}
 	rf.resetElectionTimer()
 	// if me is a leader, the next time AppendEntryTimer fires, it will start heartbeat
-	// if rf.role == Leader {
-	// 	rf.mu.Unlock()
-	// 	// start heartbeat
-	// 	rf.sendHearbeatToPeers()
-	// }
+	if rf.role == Leader {
+		for i := range rf.peers {
+			if i == rf.me {
+				continue
+			}
+			rf.resetAppendEntryTimerForPeer(i)
+		}
+	}
 }
 
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {

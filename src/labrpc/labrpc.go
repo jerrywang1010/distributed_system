@@ -51,6 +51,7 @@ package labrpc
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"math/rand"
 	"reflect"
@@ -104,6 +105,7 @@ func (e *ClientEnd) Call(svcMeth string, args interface{}, reply interface{}) bo
 		// the request has been sent.
 	case <-e.done:
 		// entire Network has been destroyed.
+		fmt.Printf("the faque\n")
 		return false
 	}
 
