@@ -136,6 +136,7 @@ func (rf *Raft) startElection() {
 	defer DPrintf("================================================================================")
 	if rf.role == Leader {
 		DPrintf("node %v is a leader, skipping this election\n", rf.me)
+		rf.resetElectionTimer()
 		return
 	}
 	rf.changeRole(Candidate)
@@ -175,28 +176,34 @@ func (rf *Raft) startElection() {
 	if rf.role == Candidate {
 		votesReceived := 0
 		votesGranted := 0
+CollectResponse:
 		for {
-			reply := <-replyCh
-			votesReceived++
-			if reply.Term > rf.currentTerm {
-				rf.currentTerm = reply.Term
-				DPrintf("node %v received reply with term %v, convert back to follower",
-					rf.me, reply.Term)
-				rf.changeRole(Follower)
-				break
-			}
-			if reply.VoteGranted {
-				votesGranted++
-			}
-			if votesGranted > len(rf.peers)/2 { // received majority of votes
-				DPrintf("node %v received %v votes, became leader for term=%v",
-					rf.me, votesGranted, rf.currentTerm)
-				rf.changeRole(Leader)
-				break
-			} else if votesReceived == len(rf.peers) { // all peers responded, not enough votes
-				DPrintf("node %v received %v votes, not enough", rf.me, votesGranted)
-				rf.changeRole(Follower)
-				break
+			select {
+			case <-rf.stopCh:
+				DPrintf("node %v is killed, exiting", rf.me)
+				return
+			case reply := <-replyCh:
+				votesReceived++
+				if reply.Term > rf.currentTerm {
+					rf.currentTerm = reply.Term
+					DPrintf("node %v received reply with term %v, convert back to follower",
+						rf.me, reply.Term)
+					rf.changeRole(Follower)
+					break CollectResponse
+				}
+				if reply.VoteGranted {
+					votesGranted++
+				}
+				if votesGranted > len(rf.peers)/2 { // received majority of votes
+					DPrintf("node %v received at least %v votes, became leader for term=%v",
+						rf.me, votesGranted, rf.currentTerm)
+					rf.changeRole(Leader)
+					break CollectResponse
+				} else if votesReceived == len(rf.peers) { // all peers responded, not enough votes
+					DPrintf("node %v received %v votes, not enough", rf.me, votesGranted)
+					rf.changeRole(Follower)
+					break CollectResponse
+				}
 			}
 		}
 	}
@@ -218,8 +225,15 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 }
 
 func (rf *Raft) waitForElectionTimeout() {
-	for !rf.killed() {
-		<-rf.electionTimer.C
-		rf.startElection()
+	for {
+		select {
+		// killed
+		case <-rf.stopCh:
+			DPrintf("node=%v is killed, existing go routing to listen for election timeout", rf.me)
+			return
+		case <-rf.electionTimer.C:
+			// DPrintf("election timeout for node %v", rf.me)
+			rf.startElection()
+		}
 	}
 }

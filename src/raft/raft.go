@@ -94,6 +94,9 @@ type Raft struct {
 	nextIndex         []int // for each server, index of the next log entry to send to that server
 	matchIndex        []int // for each server, index of the highest log entry known to be replicated
 	appendEntryTimers []*time.Timer
+
+	// channel to block when not killed
+	stopCh chan struct{}
 }
 
 // return currentTerm and whether this server
@@ -181,6 +184,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 func (rf *Raft) Kill() {
 	atomic.StoreInt32(&rf.dead, 1)
 	// Your code here, if desired.
+	DPrintf("calling kill() on node %v", rf.me)
+	close(rf.stopCh)
 }
 
 func (rf *Raft) killed() bool {
@@ -205,6 +210,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
+	rf.stopCh = make(chan struct{})
 
 	// Your initialization code here (2A, 2B, 2C).
 	rf.role = Follower

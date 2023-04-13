@@ -2,18 +2,18 @@ package raft
 
 // spawn a go routine for each peer and wait for append entry timeout and send append entry
 func (rf *Raft) waitForAppendEntryTimeout() {
-	for !rf.killed() {
+	for {
 		for i := range rf.peers {
 			if i == rf.me {
 				continue
 			}
 			select {
+			case <-rf.stopCh:
+				DPrintf("node=%v is killed, existing go routing to listen for appendEntry timeout", rf.me)
+				return
 			case <-rf.appendEntryTimers[i].C:
-				if !rf.killed() {
-					go rf.sendHearbeatToPeer(i)
-				} else {
-					break
-				}
+				// DPrintf("appendEntry time out for node %v", rf.me)
+				go rf.sendHearbeatToPeer(i)
 			}
 		}
 	}
@@ -25,7 +25,7 @@ func (rf *Raft) sendHearbeatToPeer(i int) {
 	if rf.role != Leader {
 		return
 	}
-	DPrintf("====================leader %v sending heartbeats to node %v, role=%v====================",
+	DPrintf("====================leader %v sending heartbeats to node %v, current term=%v====================",
 		rf.me, i, rf.currentTerm)
 	defer DPrintf("================================================================================")
 	rf.resetAppendEntryTimerForPeer(i)
