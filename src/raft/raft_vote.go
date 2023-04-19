@@ -72,7 +72,7 @@ func (rf *Raft) resetElectionTimer() {
 	}
 	// randomize election timeout
 	rand.Seed(time.Now().UnixNano())
-	// a random time interval between 0 and ElectionTimeOut(400ms)
+	// a random time interval between 0 and ElectionTimeOut(400ms)RequestVote
 	randomTimeout := time.Duration(rand.Int63()) % ElectionTimeout
 	rf.electionTimer.Reset(ElectionTimeout + randomTimeout)
 	DPrintf("reset election timer for node %v, timeout %v\n", rf.me, ElectionTimeout+randomTimeout)
@@ -230,13 +230,13 @@ func (rf *Raft) startElection() {
 		}
 	}
 	rf.resetElectionTimer()
-	// if me is a leader, the next time AppendEntryTimer fires, it will start heartbeat
+	// if me is a leader, set the appendEntry Timer to fire immediately, it will start heartbeat
 	if rf.role == Leader {
 		for i := range rf.peers {
 			if i == rf.me {
 				continue
 			}
-			rf.resetAppendEntryTimerForPeer(i)
+			rf.resetAppendEntryTimerForPeerToZero(i)
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package raft
 
-// spawn a go routine for each peer and wait for append entry timeout and send append entry
+// spawn a go routine for each peer and wait for append entry timeout and send append entry, run forever until nodeis killed
 // one go routine for each peer only, don't spawn inf threads
 func (rf *Raft) waitForAppendEntryTimeout() {
 	for i := range rf.peers {
@@ -8,13 +8,16 @@ func (rf *Raft) waitForAppendEntryTimeout() {
 			continue
 		}
 		go func(i int) {
-			select {
-			case <-rf.stopCh:
-				DPrintf("node=%v is killed, exiting go routing to listen for appendEntry timeout", rf.me)
-				return
-			case <-rf.appendEntryTimers[i].C:
-				// DPrintf("appendEntry time out for node %v", rf.me)
-				rf.sendHearbeatToPeer(i)
+			DPrintf("spawning a go routine for node=%v to listen for appendEntry timeout for peer %v", rf.me, i)
+			for {
+				select {
+				case <-rf.stopCh:
+					DPrintf("node=%v is killed, exiting go routing to listen for appendEntry timeout for peer %v", rf.me, i)
+					return
+				case <-rf.appendEntryTimers[i].C:
+					DPrintf("appendEntry time out for node %v to node %v", rf.me, i)
+					rf.sendHearbeatToPeer(i)
+				}
 			}
 		}(i)
 	}
@@ -36,7 +39,9 @@ func (rf *Raft) sendHearbeatToPeer(i int) {
 	args.IsHeartBeat = true
 	args.LeaderID = rf.me
 
+	rf.mu.Unlock()
 	ok := rf.sendAppendEntries(i, &args, &reply)
+	rf.mu.Lock()
 
 	if !ok {
 		DPrintf("leader %v can not send heartbeat to peer %v", rf.me, i)
@@ -53,13 +58,19 @@ func (rf *Raft) sendHearbeatToPeer(i int) {
 }
 
 func (rf *Raft) resetAppendEntryTimerForPeer(i int) {
-	if !rf.appendEntryTimers[i].Stop() {
-		select {
-		case <-rf.appendEntryTimers[i].C:
-		default:
-		}
-	}
+	// if !rf.appendEntryTimers[i].Stop() {
+	// 	select {
+	// 	case <-rf.appendEntryTimers[i].C:
+	// 	default:
+	// 	}
+	// }
+	rf.appendEntryTimers[i].Stop()
 	rf.appendEntryTimers[i].Reset(AppendEntryTimeout)
+}
+
+func (rf *Raft) resetAppendEntryTimerForPeerToZero(i int) {
+	rf.appendEntryTimers[i].Stop()
+	rf.appendEntryTimers[i].Reset(0)
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *AppendEntryReply) bool {
