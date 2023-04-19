@@ -154,29 +154,51 @@ func (rf *Raft) startElection() {
 	// unlock as while sending request vote, it might receive other rpc and change state
 	rf.mu.Unlock()
 
-	// check if role is still candidiate before promote to leader
 	for i := range rf.peers {
 		if i != rf.me {
+			// keep sending rpc to this peer until respond or rpc timeout
 			go func(peer int) {
+				// to store return val from rpc call, so that we know the other server has responded
+				ch := make(chan bool, 1)
 				var reply RequestVoteReply
-				ok := rf.sendRequestVote(peer, &args, &reply)
-				if ok {
-					replyCh <- reply
-				} else {
-					DPrintf("node %v can't reach peer %v to send request vote rpc",
-						rf.me, peer)
-					replyCh <- RequestVoteReply{Term: 0, VoteGranted: false}
+				RPCTimer := time.NewTimer(RPCTimeout)
+				defer RPCTimer.Stop()
+				for {
+					go func () {
+						ok := rf.sendRequestVote(peer, &args, &reply)
+						ch <- ok
+					} ()
+					select {
+					case <- RPCTimer.C:
+						DPrintf("node %v can't reach peer %v to send request vote rpc, rpc timeout",
+							rf.me, peer)
+						replyCh <- RequestVoteReply{Term: 0, VoteGranted: false}
+						return
+					case ok := <- ch:
+						// a valid reply, can return too
+						if ok {
+							replyCh <- reply
+							return
+						} else { // rpc failed, rpc hasen't timed out, retry
+							DPrintf("node %v can't reach peer %v to send request vote rpc",
+								rf.me, peer)
+							replyCh <- RequestVoteReply{Term: 0, VoteGranted: false}
+							continue
+						}
+					}
 				}
+				
 			}(i)
 		}
 	}
 
 	rf.mu.Lock()
 	// if other node hasn't become the leader first
+	// check if role is still candidiate before promote to leader
 	if rf.role == Candidate {
 		votesReceived := 0
 		votesGranted := 0
-CollectResponse:
+	CollectResponse:
 		for {
 			select {
 			case <-rf.stopCh:
@@ -229,7 +251,7 @@ func (rf *Raft) waitForElectionTimeout() {
 		select {
 		// killed
 		case <-rf.stopCh:
-			DPrintf("node=%v is killed, existing go routing to listen for election timeout", rf.me)
+			DPrintf("node=%v is killed, exiting go routing to listen for election timeout", rf.me)
 			return
 		case <-rf.electionTimer.C:
 			// DPrintf("election timeout for node %v", rf.me)

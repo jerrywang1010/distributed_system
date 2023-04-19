@@ -40,6 +40,7 @@ func (r Role) String() string {
 const (
 	ElectionTimeout    = 400 * time.Millisecond
 	AppendEntryTimeout = 200 * time.Millisecond
+	RPCTimeout         = 100 * time.Millisecond
 )
 
 // import "bytes"
