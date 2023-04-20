@@ -156,13 +156,13 @@ func (rf *Raft) startElection() {
 
 	for i := range rf.peers {
 		if i != rf.me {
-			// keep sending rpc to this peer until respond or rpc timeout
 			go func(peer int) {
 				// to store return val from rpc call, so that we know the other server has responded
 				ch := make(chan bool, 1)
 				var reply RequestVoteReply
 				RPCTimer := time.NewTimer(RPCTimeout)
 				defer RPCTimer.Stop()
+				// keep sending rpc to this peer until respond or rpc timeout
 				for {
 					go func () {
 						ok := rf.sendRequestVote(peer, &args, &reply)
@@ -180,9 +180,8 @@ func (rf *Raft) startElection() {
 							replyCh <- reply
 							return
 						} else { // rpc failed, rpc hasen't timed out, retry
-							DPrintf("node %v can't reach peer %v to send request vote rpc",
+							DPrintf("node %v can't reach peer %v to send request vote rpc, retrying",
 								rf.me, peer)
-							replyCh <- RequestVoteReply{Term: 0, VoteGranted: false}
 							continue
 						}
 					}

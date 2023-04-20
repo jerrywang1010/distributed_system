@@ -1,5 +1,10 @@
 package raft
 
+import (
+	"sync"
+	"time"
+)
+
 // spawn a go routine for each peer and wait for append entry timeout and send append entry, run forever until nodeis killed
 // one go routine for each peer only, don't spawn inf threads
 func (rf *Raft) waitForAppendEntryTimeout() {
@@ -15,7 +20,7 @@ func (rf *Raft) waitForAppendEntryTimeout() {
 					DPrintf("node=%v is killed, exiting go routing to listen for appendEntry timeout for peer %v", rf.me, i)
 					return
 				case <-rf.appendEntryTimers[i].C:
-					DPrintf("appendEntry time out for node %v to node %v", rf.me, i)
+					// DPrintf("appendEntry time out for node %v to node %v", rf.me, i)
 					rf.sendHearbeatToPeer(i)
 				}
 			}
@@ -40,14 +45,41 @@ func (rf *Raft) sendHearbeatToPeer(i int) {
 	args.LeaderID = rf.me
 
 	rf.mu.Unlock()
-	ok := rf.sendAppendEntries(i, &args, &reply)
+
+	// wait for the go routine that sends append entry rpc to finish before continuing
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func(peer int) {
+		ch := make(chan bool, 1)
+		RPCtimer := time.NewTimer(RPCTimeout)
+		defer RPCtimer.Stop()
+		defer wg.Done()
+		for {
+			go func() {
+				ch <- rf.sendAppendEntries(peer, &args, &reply)
+			}()
+
+			select {
+			case <-RPCtimer.C:
+				DPrintf("leader %v can't reach peer %v to send heartbeat rpc, rpc timeout", rf.me, peer)
+				reply.Success = false
+				reply.Term = 0
+				return
+			case ok := <-ch:
+				if ok {
+					return
+				} else {
+					DPrintf("leader %v can't reach peer %v to send heartbeat rpc, retrying", rf.me, peer)
+					continue
+				}
+			}
+		}
+	}(i)
+
+	wg.Wait()
 	rf.mu.Lock()
-
-	if !ok {
-		DPrintf("leader %v can not send heartbeat to peer %v", rf.me, i)
-		return
-	}
-
+	DPrintf("leader %v recerived heartbeat reply from %v, reply.Term=%v", rf.me, i, reply.Term)
 	if reply.Term > rf.currentTerm {
 		DPrintf("leader %v received a heartbeat reply with higher term=%v than current term=%v from node %v",
 			rf.me, reply.Term, rf.currentTerm, i)
@@ -81,11 +113,12 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *Appe
 func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	DPrintf("====================node %v received AppendEntries PRC from %v====================", rf.me, args.LeaderID)
+	DPrintf("====================node %v received AppendEntries PRC from %v, term %v====================", rf.me, args.LeaderID, args.Term)
 	defer DPrintf("================================================================================")
 	reply.Term = rf.currentTerm
 
 	if args.Term < rf.currentTerm {
+		DPrintf("AppendEntry args term %v < current term %v, returning false", args.Term, rf.currentTerm)
 		reply.Success = false
 		return
 	}
