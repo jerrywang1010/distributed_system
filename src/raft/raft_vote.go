@@ -250,7 +250,7 @@ func (rf *Raft) waitForElectionTimeout() {
 		select {
 		// killed
 		case <-rf.stopCh:
-			DPrintf("node=%v is killed, exiting go routing to listen for election timeout", rf.me)
+			// DPrintf("node=%v is killed, exiting go routing to listen for election timeout", rf.me)
 			return
 		case <-rf.electionTimer.C:
 			// DPrintf("election timeout for node %v", rf.me)
