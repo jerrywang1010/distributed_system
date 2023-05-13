@@ -91,6 +91,9 @@ type Raft struct {
 	commitIndex int // index of the highest logEntry known to be committed
 	lastApplied int // index of the highest logEntry applied to the statemachine
 
+	// a empty struct channel for applying committed events
+	readyToApplyCh chan struct{}
+
 	// only on leaders
 	nextIndex         []int // for each server, index of the next log entry to send to that server
 	matchIndex        []int // for each server, index of the highest log entry known to be replicated
@@ -162,13 +165,21 @@ func (rf *Raft) readPersist(data []byte) {
 // the leader.
 //
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
-	index := -1
-	term := -1
-	isLeader := true
-
 	// Your code here (2B).
-
-	return index, term, isLeader
+	if rf.killed() {
+		return 0, 0, false
+	}
+	if _, isLeader := rf.GetState(); isLeader {
+		rf.mu.Lock()
+		defer rf.mu.Unlock()
+		rf.log = append(rf.log, logEntry{
+			Command: command,
+			Term: rf.currentTerm,
+		})
+		rf.matchIndex[rf.me] = len(rf.log) - 1
+		return len(rf.log) - 1, rf.currentTerm, true
+	}
+	return 0, 0, false
 }
 
 //
@@ -212,6 +223,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.persister = persister
 	rf.me = me
 	rf.stopCh = make(chan struct{})
+	rf.readyToApplyCh = make(chan struct{}, 10)
 
 	// Your initialization code here (2A, 2B, 2C).
 	rf.role = Follower
@@ -236,6 +248,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	// spawn a go routine to listen for append entry and wait for election if timeout
 	go rf.waitForElectionTimeout()
 	go rf.waitForAppendEntryTimeout()
+	go rf.applyComittedMsg()
 
 	return rf
 }

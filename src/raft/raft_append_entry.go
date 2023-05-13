@@ -4,6 +4,33 @@ import (
 	"time"
 )
 
+func (rf *Raft) applyComittedMsg() {
+	for {
+		select {
+		case <-rf.readyToApplyCh:
+			rf.mu.Lock()
+			defer rf.mu.Unlock()
+			DPrintf("Node %v applying new commited msg, lastApplied=%v, Committed=%v",
+				rf.me, rf.lastApplied, rf.commitIndex)
+			if rf.commitIndex > rf.lastApplied {
+				newMsg := make([]ApplyMsg, rf.commitIndex-rf.lastApplied)
+				for i := rf.lastApplied + 1; i <= rf.commitIndex; i++ {
+					newMsg = append(newMsg, ApplyMsg{
+						CommandValid: true,
+						Command:      rf.log[i].Command,
+						CommandIndex: i,
+					})
+				}
+
+				for _, msg := range newMsg {
+					rf.applyCh <- msg
+				}
+				rf.lastApplied = rf.commitIndex
+			}
+		}
+	}
+}
+
 // spawn a go routine for each peer and wait for append entry timeout and send append entry, run forever until nodeis killed
 // one go routine for each peer only, don't spawn inf threads
 func (rf *Raft) waitForAppendEntryTimeout() {
