@@ -10,8 +10,6 @@ func (rf *Raft) applyComittedMsg() {
 		case <-rf.readyToApplyCh:
 			rf.mu.Lock()
 			defer rf.mu.Unlock()
-			DPrintf("Node %v applying new commited msg, lastApplied=%v, Committed=%v",
-				rf.me, rf.lastApplied, rf.commitIndex)
 			if rf.commitIndex > rf.lastApplied {
 				newMsg := make([]ApplyMsg, rf.commitIndex-rf.lastApplied)
 				for i := rf.lastApplied + 1; i <= rf.commitIndex; i++ {
@@ -26,6 +24,8 @@ func (rf *Raft) applyComittedMsg() {
 					rf.applyCh <- msg
 				}
 				rf.lastApplied = rf.commitIndex
+				DPrintf("Node %v applying new commited msg, updating lastApplied=%v",
+					rf.me, rf.lastApplied)
 			}
 		}
 	}
@@ -39,7 +39,7 @@ func (rf *Raft) waitForAppendEntryTimeout() {
 			continue
 		}
 		go func(i int) {
-			DPrintf("spawning a go routine for node=%v to listen for appendEntry timeout for peer %v", rf.me, i)
+			// DPrintf("spawning a go routine for node=%v to listen for appendEntry timeout for peer %v", rf.me, i)
 			for {
 				select {
 				case <-rf.stopCh:
@@ -63,6 +63,7 @@ func (rf *Raft) getAppendEntriesArgsForPeer(i int) AppendEntryArgs {
 	}
 	// if there are new stuff to commit
 	if len(rf.log) > rf.nextIndex[i] {
+		// DPrintf("node %v getAppendEntriesArgsForPeer to node %v, nextIndex=%v, log=%v", rf.me, i, rf.nextIndex[i], rf.log)
 		args.IsHeartBeat = false
 		args.PrevLogIndex = rf.nextIndex[i] - 1
 		args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
@@ -80,25 +81,31 @@ func (rf *Raft) getAppendEntriesArgsForPeer(i int) AppendEntryArgs {
 // of matchIndex[i] ≥ N, and log[N].term == currentTerm:
 // set commitIndex = N
 func (rf *Raft) updateCommitIndex() {
+	committed := false
 	for i := rf.commitIndex + 1; ; i++ {
 		matchedFollowerCount := 0
 		for _, m := range rf.matchIndex {
 			if m >= i {
 				matchedFollowerCount++
 				// already majority, go to next index
-				if matchedFollowerCount >= len(rf.matchIndex)+1 {
+				if matchedFollowerCount >= len(rf.matchIndex)/2+1 {
 					break
 				}
 			}
 		}
-		if matchedFollowerCount >= len(rf.matchIndex)+1 {
+		if matchedFollowerCount >= len(rf.matchIndex)/2+1 {
 			if rf.log[i].Term == rf.currentTerm {
+				committed = true
 				rf.commitIndex = i
 				DPrintf("updating commitIndex for leader %v to %v", rf.me, rf.commitIndex)
 			}
 		} else { // don't have majority
-			return
+			break
 		}
+	}
+	// notify the apply channel to apply new commited msg
+	if committed {
+		rf.readyToApplyCh <- struct{}{}
 	}
 }
 
@@ -107,8 +114,10 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 	defer func() {
 		if needUnlock {
 			rf.mu.Unlock()
+			if rf.role == Leader {
+				DPrintf("================================================================================")
+			}
 		}
-		DPrintf("================================================================================")
 	}()
 
 	for !rf.killed() {
@@ -168,8 +177,10 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 		rf.nextIndex[i] = reply.NextIndex
 		if reply.Success {
 			rf.matchIndex[i] = reply.NextIndex - 1
+			DPrintf("leader %v updating [nextIndex, matchIndex] for node %v to [%v, %v]",
+				rf.me, i, rf.nextIndex[i], rf.matchIndex[i])
 			// if heartbeat, commit index won't change
-			if !args.IsHeartBeat {
+			if !args.IsHeartBeat && rf.matchIndex[i] > rf.commitIndex {
 				rf.updateCommitIndex()
 			}
 			return
@@ -204,7 +215,7 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntryArgs, reply *Appe
 func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	DPrintf("====================node %v received AppendEntries PRC from %v, args=%v====================", rf.me, args.LeaderID, args)
+	DPrintf("====================node %v received AppendEntries PRC from %v, args=%+v====================", rf.me, args.LeaderID, args)
 	defer DPrintf("================================================================================")
 	reply.Term = rf.currentTerm
 	reply.NextIndex = -1
@@ -256,7 +267,7 @@ func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 	reply.Success = true
 	rf.log = append(rf.log[:args.PrevLogIndex+1], args.Entries...)
 	reply.NextIndex = len(rf.log)
-	DPrintf("AppendEntry successed")
+	DPrintf("node %v, appendEntry successed, log=%v, reply.NextIndex=%v", rf.me, rf.log, reply.NextIndex)
 	if rf.commitIndex < args.LeaderCommitIndex {
 		if args.LeaderCommitIndex < len(rf.log) {
 			rf.commitIndex = args.LeaderCommitIndex

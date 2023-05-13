@@ -1,0 +1,148 @@
+2023/05/13 19:09:10 reset election timer for node 0, timeout 473.773899ms
+2023/05/13 19:09:10 reset election timer for node 1, timeout 766.425331ms
+2023/05/13 19:09:10 reset election timer for node 2, timeout 633.70577ms
+Test (2B): basic agreement ...
+2023/05/13 19:09:10 ====================node 0 started election, role=Follower====================
+2023/05/13 19:09:10 changing roles for node 0 from Follower to Candidate
+2023/05/13 19:09:10 term=1
+2023/05/13 19:09:10 ====================node 2 received RequestVote PRC from 0 for term 1====================
+2023/05/13 19:09:10 node 2 voted for 0 for the first time in this term
+2023/05/13 19:09:10 reset election timer for node 2, timeout 505.548571ms
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 node 0 received at least 2 votes, became leader for term=1
+2023/05/13 19:09:10 changing roles for node 0 from Candidate to Leader
+2023/05/13 19:09:10 reset election timer for node 0, timeout 742.533842ms
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 ====================node 1 received RequestVote PRC from 0 for term 1====================
+2023/05/13 19:09:10 node 1 voted for 0 for the first time in this term
+2023/05/13 19:09:10 reset election timer for node 1, timeout 482.882007ms
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 ====================leader 0 sending AppendEntry to node 2, current term=1====================
+2023/05/13 19:09:10 ====================leader 0 sending AppendEntry to node 1, current term=1====================
+2023/05/13 19:09:10 ====================node 2 received AppendEntries PRC from 0, args=&{Term:1 LeaderID:0 PrevLogIndex:0 PrevLogTerm:0 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:10 reset election timer for node 2, timeout 690.784734ms
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 leader 0 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/13 19:09:10 leader 0 updating [nextIndex, matchIndex] for node 2 to [1, 0]
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 ====================node 1 received AppendEntries PRC from 0, args=&{Term:1 LeaderID:0 PrevLogIndex:0 PrevLogTerm:0 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:10 reset election timer for node 1, timeout 414.873593ms
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 leader 0 recerived AppendEntry reply from 1, reply.success=true, reply.Term=1
+2023/05/13 19:09:10 leader 0 updating [nextIndex, matchIndex] for node 1 to [1, 0]
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 Leader 0 received command 100, putting at index 1, in term 1
+2023/05/13 19:09:10 ====================leader 0 sending AppendEntry to node 1, current term=1====================
+2023/05/13 19:09:10 ====================leader 0 sending AppendEntry to node 2, current term=1====================
+2023/05/13 19:09:10 ====================node 1 received AppendEntries PRC from 0, args=&{Term:1 LeaderID:0 PrevLogIndex:0 PrevLogTerm:0 Entries:[{Command:100 Term:1}] LeaderCommitIndex:0 IsHeartBeat:false}====================
+2023/05/13 19:09:10 reset election timer for node 1, timeout 410.419654ms
+2023/05/13 19:09:10 node 1, appendEntry successed, log=[{<nil> 0} {100 1}], reply.NextIndex=2
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 leader 0 recerived AppendEntry reply from 1, reply.success=true, reply.Term=1
+2023/05/13 19:09:10 leader 0 updating [nextIndex, matchIndex] for node 1 to [2, 1]
+2023/05/13 19:09:10 updating commitIndex for leader 0 to 1
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:10 Node 0 applying new commited msg, lastApplied=0, Committed=1
+2023/05/13 19:09:10 ====================node 2 received AppendEntries PRC from 0, args=&{Term:1 LeaderID:0 PrevLogIndex:0 PrevLogTerm:0 Entries:[{Command:100 Term:1}] LeaderCommitIndex:0 IsHeartBeat:false}====================
+2023/05/13 19:09:10 reset election timer for node 2, timeout 723.560452ms
+2023/05/13 19:09:10 node 2, appendEntry successed, log=[{<nil> 0} {100 1}], reply.NextIndex=2
+2023/05/13 19:09:10 ================================================================================
+2023/05/13 19:09:11 ====================node 1 started election, role=Follower====================
+2023/05/13 19:09:11 changing roles for node 1 from Follower to Candidate
+2023/05/13 19:09:11 term=2
+2023/05/13 19:09:11 ====================node 2 received RequestVote PRC from 1 for term 2====================
+2023/05/13 19:09:11 node 2 voted for 1 for the first time in this term
+2023/05/13 19:09:11 reset election timer for node 2, timeout 411.161209ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 node 1 received at least 2 votes, became leader for term=2
+2023/05/13 19:09:11 changing roles for node 1 from Candidate to Leader
+2023/05/13 19:09:11 reset election timer for node 1, timeout 473.476351ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:11 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:11 reset election timer for node 2, timeout 565.888566ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:11 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:11 node 1 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:11 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:11 reset election timer for node 2, timeout 468.364106ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:11 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:11 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:11 reset election timer for node 2, timeout 577.408309ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:11 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 ====================node 1 started election, role=Leader====================
+2023/05/13 19:09:11 node 1 is a leader, skipping this election
+2023/05/13 19:09:11 reset election timer for node 1, timeout 525.027785ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:11 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:11 reset election timer for node 2, timeout 517.395809ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:11 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:11 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:11 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:11 reset election timer for node 2, timeout 775.023265ms
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:11 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:11 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:11 ================================================================================
+2023/05/13 19:09:12 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:12 ====================node 1 started election, role=Leader====================
+2023/05/13 19:09:12 node 1 is a leader, skipping this election
+2023/05/13 19:09:12 reset election timer for node 1, timeout 574.621317ms
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:12 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:12 reset election timer for node 2, timeout 796.019977ms
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:12 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:12 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:12 reset election timer for node 2, timeout 620.105454ms
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:12 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 leader 1 can't reach peer 0 to send AppendEntry rpc, rpc timeout
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 2, current term=2====================
+2023/05/13 19:09:12 ====================leader 1 sending AppendEntry to node 0, current term=2====================
+2023/05/13 19:09:12 ====================node 2 received AppendEntries PRC from 1, args=&{Term:2 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/13 19:09:12 reset election timer for node 2, timeout 490.409219ms
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=2
+2023/05/13 19:09:12 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/13 19:09:12 ================================================================================
+2023/05/13 19:09:12 calling kill() on node 0
+2023/05/13 19:09:12 calling kill() on node 1
+2023/05/13 19:09:12 calling kill() on node 2
+--- FAIL: TestBasicAgree2B (2.51s)
+    config.go:473: one(100) failed to reach agreement
+FAIL
+exit status 1
+FAIL	github.com/jerrywang1010/6.824/src/raft	2.516s

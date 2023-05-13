@@ -174,8 +174,10 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		defer rf.mu.Unlock()
 		rf.log = append(rf.log, logEntry{
 			Command: command,
-			Term: rf.currentTerm,
+			Term:    rf.currentTerm,
 		})
+		DPrintf("Leader %v received command %v, putting at index %v, in term %v",
+			rf.me, command, len(rf.log)-1, rf.currentTerm)
 		rf.matchIndex[rf.me] = len(rf.log) - 1
 		return len(rf.log) - 1, rf.currentTerm, true
 	}
