@@ -8,10 +8,10 @@ func (rf *Raft) applyComittedMsg() {
 	for {
 		select {
 		case <-rf.readyToApplyCh:
-			rf.mu.Lock()
-			defer rf.mu.Unlock()
+			// rf.mu.Lock()
+			// defer rf.mu.Unlock()
 			if rf.commitIndex > rf.lastApplied {
-				newMsg := make([]ApplyMsg, rf.commitIndex-rf.lastApplied)
+				newMsg := make([]ApplyMsg, 0, rf.commitIndex-rf.lastApplied)
 				for i := rf.lastApplied + 1; i <= rf.commitIndex; i++ {
 					newMsg = append(newMsg, ApplyMsg{
 						CommandValid: true,
@@ -24,8 +24,8 @@ func (rf *Raft) applyComittedMsg() {
 					rf.applyCh <- msg
 				}
 				rf.lastApplied = rf.commitIndex
-				DPrintf("Node %v applying new commited msg, updating lastApplied=%v",
-					rf.me, rf.lastApplied)
+				DPrintf("Node %v applying %v new commited msg, updating lastApplied=%v",
+					rf.me, len(newMsg), rf.lastApplied)
 			}
 		}
 	}
@@ -97,13 +97,13 @@ func (rf *Raft) updateCommitIndex() {
 			if rf.log[i].Term == rf.currentTerm {
 				committed = true
 				rf.commitIndex = i
-				DPrintf("updating commitIndex for leader %v to %v", rf.me, rf.commitIndex)
+				DPrintf("leader %v updating commitIndex to %v", rf.me, rf.commitIndex)
 			}
 		} else { // don't have majority
 			break
 		}
 	}
-	// notify the apply channel to apply new commited msg
+	// notify the apply channel to apply new commited msg for leader
 	if committed {
 		rf.readyToApplyCh <- struct{}{}
 	}
@@ -192,12 +192,6 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 }
 
 func (rf *Raft) resetAppendEntryTimerForPeer(i int) {
-	// if !rf.appendEntryTimers[i].Stop() {
-	// 	select {
-	// 	case <-rf.appendEntryTimers[i].C:
-	// 	default:
-	// 	}
-	// }
 	rf.appendEntryTimers[i].Stop()
 	rf.appendEntryTimers[i].Reset(AppendEntryTimeout)
 }
@@ -231,12 +225,6 @@ func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 		rf.changeRole(Follower)
 	}
 	rf.resetElectionTimer()
-	// heartbeat
-	if args.IsHeartBeat == true {
-		reply.NextIndex = len(rf.log)
-		reply.Success = true
-		return
-	}
 
 	// 2B
 	// reply false if log doesn't contain a log entry at prevLogIndex whose term matches preLogTerm
@@ -274,7 +262,8 @@ func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 		} else {
 			rf.commitIndex = len(rf.log) - 1
 		}
-		DPrintf("updating commitIndex to %v", rf.commitIndex)
+		DPrintf("Node%v, updating commitIndex to %v", rf.me, rf.commitIndex)
+		rf.readyToApplyCh <- struct{}{} // for followers
 	}
 }
 
