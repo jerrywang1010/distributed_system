@@ -1,0 +1,883 @@
+2023/05/24 09:48:31 reset election timer for node 0, timeout 630.569541ms
+2023/05/24 09:48:31 reset election timer for node 1, timeout 426.228046ms
+2023/05/24 09:48:31 reset election timer for node 2, timeout 475.055662ms
+Test (2B): agreement despite follower disconnection ...
+2023/05/24 09:48:31 ====================node 1 started election, role=Follower====================
+2023/05/24 09:48:31 changing roles for node 1 from Follower to Candidate
+2023/05/24 09:48:31 term=1
+2023/05/24 09:48:31 ====================node 2 received RequestVote PRC from 1 for term 1====================
+2023/05/24 09:48:31 node 2 voted for 1 for the first time in this term
+2023/05/24 09:48:31 reset election timer for node 2, timeout 735.629734ms
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 ====================node 0 received RequestVote PRC from 1 for term 1====================
+2023/05/24 09:48:31 node 0 voted for 1 for the first time in this term
+2023/05/24 09:48:31 reset election timer for node 0, timeout 457.571439ms
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 node 1 received at least 2 votes, became leader for term=1
+2023/05/24 09:48:31 changing roles for node 1 from Candidate to Leader
+2023/05/24 09:48:31 reset election timer for node 1, timeout 746.902142ms
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:31 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:31 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:0 PrevLogTerm:0 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/24 09:48:31 reset election timer for node 2, timeout 757.080214ms
+2023/05/24 09:48:31 node 2, appendEntry successed, log=[{<nil> 0}], reply.NextIndex=1
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:0 PrevLogTerm:0 Entries:[] LeaderCommitIndex:0 IsHeartBeat:true}====================
+2023/05/24 09:48:31 reset election timer for node 0, timeout 594.774545ms
+2023/05/24 09:48:31 node 0, appendEntry successed, log=[{<nil> 0}], reply.NextIndex=1
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/24 09:48:31 leader 1 updating [nextIndex, matchIndex] for node 2 to [1, 0]
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:31 leader 1 updating [nextIndex, matchIndex] for node 0 to [1, 0]
+2023/05/24 09:48:31 ================================================================================
+2023/05/24 09:48:31 Leader 1 received command 101, putting at index 1, in term 1
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:32 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:0 PrevLogTerm:0 Entries:[{Command:101 Term:1}] LeaderCommitIndex:0 IsHeartBeat:false}====================
+2023/05/24 09:48:32 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:0 PrevLogTerm:0 Entries:[{Command:101 Term:1}] LeaderCommitIndex:0 IsHeartBeat:false}====================
+2023/05/24 09:48:32 reset election timer for node 0, timeout 518.265542ms
+2023/05/24 09:48:32 node 0, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 0 to [2, 1]
+2023/05/24 09:48:32 leader 1 updating commitIndex to 1
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 Node 1 applying 1 new commited msg, updating lastApplied=1
+2023/05/24 09:48:32 reset election timer for node 2, timeout 687.78036ms
+2023/05/24 09:48:32 node 2, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:32 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 0, timeout 646.398909ms
+2023/05/24 09:48:32 node 0, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 Node 0, updating commitIndex to 1
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 0 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 2, timeout 524.652097ms
+2023/05/24 09:48:32 node 2, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 Node 2, updating commitIndex to 1
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 Node 0 applying 1 new commited msg, updating lastApplied=1
+2023/05/24 09:48:32 Node 2 applying 1 new commited msg, updating lastApplied=1
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:32 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 2, timeout 782.363307ms
+2023/05/24 09:48:32 node 2, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 0, timeout 403.384194ms
+2023/05/24 09:48:32 node 0, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 0 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================node 1 started election, role=Leader====================
+2023/05/24 09:48:32 node 1 is a leader, skipping this election
+2023/05/24 09:48:32 reset election timer for node 1, timeout 526.152792ms
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:32 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 0, timeout 427.43963ms
+2023/05/24 09:48:32 node 0, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 0 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[] LeaderCommitIndex:1 IsHeartBeat:true}====================
+2023/05/24 09:48:32 reset election timer for node 2, timeout 642.322693ms
+2023/05/24 09:48:32 node 2, appendEntry successed, log=[{<nil> 0} {101 1}], reply.NextIndex=2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 2, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 2 to [2, 1]
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 Leader 1 received command 102, putting at index 2, in term 1
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:32 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:32 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[{Command:102 Term:1}] LeaderCommitIndex:1 IsHeartBeat:false}====================
+2023/05/24 09:48:32 reset election timer for node 0, timeout 435.740577ms
+2023/05/24 09:48:32 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1}], reply.NextIndex=3
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:32 leader 1 updating [nextIndex, matchIndex] for node 0 to [3, 2]
+2023/05/24 09:48:32 leader 1 updating commitIndex to 2
+2023/05/24 09:48:32 ================================================================================
+2023/05/24 09:48:32 Node 1 applying 1 new commited msg, updating lastApplied=2
+2023/05/24 09:48:32 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:33 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:2 PrevLogTerm:1 Entries:[] LeaderCommitIndex:2 IsHeartBeat:true}====================
+2023/05/24 09:48:33 reset election timer for node 0, timeout 675.564555ms
+2023/05/24 09:48:33 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1}], reply.NextIndex=3
+2023/05/24 09:48:33 Node 0, updating commitIndex to 2
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:33 leader 1 updating [nextIndex, matchIndex] for node 0 to [3, 2]
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 Node 0 applying 1 new commited msg, updating lastApplied=2
+2023/05/24 09:48:33 Leader 1 received command 103, putting at index 3, in term 1
+2023/05/24 09:48:33 ====================node 1 started election, role=Leader====================
+2023/05/24 09:48:33 node 1 is a leader, skipping this election
+2023/05/24 09:48:33 reset election timer for node 1, timeout 745.669823ms
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:33 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:2 PrevLogTerm:1 Entries:[{Command:103 Term:1}] LeaderCommitIndex:2 IsHeartBeat:false}====================
+2023/05/24 09:48:33 reset election timer for node 0, timeout 743.607312ms
+2023/05/24 09:48:33 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:33 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:33 leader 1 updating commitIndex to 3
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 Node 1 applying 1 new commited msg, updating lastApplied=3
+2023/05/24 09:48:33 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:33 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:33 term=2
+2023/05/24 09:48:33 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:33 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:33 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:33 node 2 received 1 votes, not enough
+2023/05/24 09:48:33 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:33 reset election timer for node 2, timeout 730.992035ms
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:33 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:33 reset election timer for node 0, timeout 475.04191ms
+2023/05/24 09:48:33 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:33 Node 0, updating commitIndex to 3
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:33 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 Node 0 applying 1 new commited msg, updating lastApplied=3
+2023/05/24 09:48:33 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:33 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:33 reset election timer for node 0, timeout 755.843378ms
+2023/05/24 09:48:33 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:33 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:33 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:33 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:33 reset election timer for node 0, timeout 539.616766ms
+2023/05/24 09:48:33 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:33 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 ====================node 1 started election, role=Leader====================
+2023/05/24 09:48:33 node 1 is a leader, skipping this election
+2023/05/24 09:48:33 reset election timer for node 1, timeout 765.816398ms
+2023/05/24 09:48:33 ================================================================================
+2023/05/24 09:48:33 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:34 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:34 reset election timer for node 0, timeout 609.617853ms
+2023/05/24 09:48:34 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:34 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:34 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:34 term=3
+2023/05/24 09:48:34 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:34 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:34 node 2 received 1 votes, not enough
+2023/05/24 09:48:34 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:34 reset election timer for node 2, timeout 736.854777ms
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:34 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:34 reset election timer for node 0, timeout 470.424664ms
+2023/05/24 09:48:34 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:34 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:34 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[] LeaderCommitIndex:3 IsHeartBeat:true}====================
+2023/05/24 09:48:34 reset election timer for node 0, timeout 475.877872ms
+2023/05/24 09:48:34 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1}], reply.NextIndex=4
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:34 leader 1 updating [nextIndex, matchIndex] for node 0 to [4, 3]
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 Leader 1 received command 104, putting at index 4, in term 1
+2023/05/24 09:48:34 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 ====================node 1 started election, role=Leader====================
+2023/05/24 09:48:34 node 1 is a leader, skipping this election
+2023/05/24 09:48:34 reset election timer for node 1, timeout 586.880054ms
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:34 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:3 PrevLogTerm:1 Entries:[{Command:104 Term:1}] LeaderCommitIndex:3 IsHeartBeat:false}====================
+2023/05/24 09:48:34 reset election timer for node 0, timeout 438.558031ms
+2023/05/24 09:48:34 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1}], reply.NextIndex=5
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:34 leader 1 updating [nextIndex, matchIndex] for node 0 to [5, 4]
+2023/05/24 09:48:34 leader 1 updating commitIndex to 4
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 Node 1 applying 1 new commited msg, updating lastApplied=4
+2023/05/24 09:48:34 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:34 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:34 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:4 PrevLogTerm:1 Entries:[] LeaderCommitIndex:4 IsHeartBeat:true}====================
+2023/05/24 09:48:34 reset election timer for node 0, timeout 558.205132ms
+2023/05/24 09:48:34 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1}], reply.NextIndex=5
+2023/05/24 09:48:34 Node 0, updating commitIndex to 4
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:34 leader 1 updating [nextIndex, matchIndex] for node 0 to [5, 4]
+2023/05/24 09:48:34 ================================================================================
+2023/05/24 09:48:34 Node 0 applying 1 new commited msg, updating lastApplied=4
+2023/05/24 09:48:34 Leader 1 received command 105, putting at index 5, in term 1
+2023/05/24 09:48:34 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:34 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:34 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:34 term=4
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:35 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:4 PrevLogTerm:1 Entries:[{Command:105 Term:1}] LeaderCommitIndex:4 IsHeartBeat:false}====================
+2023/05/24 09:48:35 reset election timer for node 0, timeout 558.58943ms
+2023/05/24 09:48:35 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1} {105 1}], reply.NextIndex=6
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:35 leader 1 updating [nextIndex, matchIndex] for node 0 to [6, 5]
+2023/05/24 09:48:35 leader 1 updating commitIndex to 5
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 Node 1 applying 1 new commited msg, updating lastApplied=5
+2023/05/24 09:48:35 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:35 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:35 node 2 received 1 votes, not enough
+2023/05/24 09:48:35 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:35 reset election timer for node 2, timeout 530.217475ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:35 ====================node 1 started election, role=Leader====================
+2023/05/24 09:48:35 node 1 is a leader, skipping this election
+2023/05/24 09:48:35 reset election timer for node 1, timeout 448.562374ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:35 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:5 PrevLogTerm:1 Entries:[] LeaderCommitIndex:5 IsHeartBeat:true}====================
+2023/05/24 09:48:35 reset election timer for node 0, timeout 585.727121ms
+2023/05/24 09:48:35 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1} {105 1}], reply.NextIndex=6
+2023/05/24 09:48:35 Node 0, updating commitIndex to 5
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 Node 0 applying 1 new commited msg, updating lastApplied=5
+2023/05/24 09:48:35 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:35 leader 1 updating [nextIndex, matchIndex] for node 0 to [6, 5]
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 Leader 1 received command 106, putting at index 6, in term 1
+2023/05/24 09:48:35 leader 1 can't reach peer 2 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 2, current term=1====================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 0, current term=1====================
+2023/05/24 09:48:35 ====================node 2 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:1 PrevLogTerm:1 Entries:[{Command:102 Term:1} {Command:103 Term:1} {Command:104 Term:1} {Command:105 Term:1} {Command:106 Term:1}] LeaderCommitIndex:5 IsHeartBeat:false}====================
+2023/05/24 09:48:35 AppendEntry args term 1 < current term 4, returning false
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 ====================node 0 received AppendEntries PRC from 1, args=&{Term:1 LeaderID:1 PrevLogIndex:5 PrevLogTerm:1 Entries:[{Command:106 Term:1}] LeaderCommitIndex:5 IsHeartBeat:false}====================
+2023/05/24 09:48:35 reset election timer for node 0, timeout 589.760697ms
+2023/05/24 09:48:35 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1} {105 1} {106 1}], reply.NextIndex=7
+2023/05/24 09:48:35 leader 1 recerived AppendEntry reply from 2, reply.success=false, reply.Term=4
+2023/05/24 09:48:35 leader 1 received a AppendEntry reply with higher term=4 than current term=1 from node 2
+2023/05/24 09:48:35 changing roles for node 1 from Leader to Follower
+2023/05/24 09:48:35 reset election timer for node 1, timeout 463.026875ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 leader 1 recerived AppendEntry reply from 0, reply.success=true, reply.Term=1
+2023/05/24 09:48:35 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:35 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:35 term=5
+2023/05/24 09:48:35 ====================node 1 received RequestVote PRC from 2 for term 5====================
+2023/05/24 09:48:35 node 1 rejected vote for node 2 because of log not up to date
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 ====================node 0 received RequestVote PRC from 2 for term 5====================
+2023/05/24 09:48:35 node 0 rejected vote for node 2 because of log not up to date
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 node 2 received 1 votes, not enough
+2023/05/24 09:48:35 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:35 reset election timer for node 2, timeout 730.921092ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 ====================node 1 started election, role=Follower====================
+2023/05/24 09:48:35 changing roles for node 1 from Follower to Candidate
+2023/05/24 09:48:35 term=6
+2023/05/24 09:48:35 ====================node 2 received RequestVote PRC from 1 for term 6====================
+2023/05/24 09:48:35 node 2 voted for 1 for the first time in this term
+2023/05/24 09:48:35 reset election timer for node 2, timeout 409.466382ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 node 1 received at least 2 votes, became leader for term=6
+2023/05/24 09:48:35 changing roles for node 1 from Candidate to Leader
+2023/05/24 09:48:35 reset election timer for node 1, timeout 784.339544ms
+2023/05/24 09:48:35 ====================node 0 received RequestVote PRC from 1 for term 6====================
+2023/05/24 09:48:35 node 0 voted for 1 for the first time in this term
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 reset election timer for node 0, timeout 512.513219ms
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 2, current term=6====================
+2023/05/24 09:48:35 ====================leader 1 sending AppendEntry to node 0, current term=6====================
+2023/05/24 09:48:35 ====================node 2 received AppendEntries PRC from 1, args=&{Term:6 LeaderID:1 PrevLogIndex:6 PrevLogTerm:1 Entries:[] LeaderCommitIndex:5 IsHeartBeat:true}====================
+2023/05/24 09:48:35 reset election timer for node 2, timeout 564.741341ms
+2023/05/24 09:48:35 AppendEntry failed on node 2, log is too short, len=2, args.PrevLogIndex=6
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:35 leader 1 recerived AppendEntry reply from 2, reply.success=false, reply.Term=6
+2023/05/24 09:48:35 ====================node 0 received AppendEntries PRC from 1, args=&{Term:6 LeaderID:1 PrevLogIndex:6 PrevLogTerm:1 Entries:[] LeaderCommitIndex:5 IsHeartBeat:true}====================
+2023/05/24 09:48:35 reset election timer for node 0, timeout 528.794936ms
+2023/05/24 09:48:35 node 0, appendEntry successed, log=[{<nil> 0} {101 1} {102 1} {103 1} {104 1} {105 1} {106 1}], reply.NextIndex=7
+2023/05/24 09:48:35 ================================================================================
+2023/05/24 09:48:36 ====================node 0 started election, role=Follower====================
+2023/05/24 09:48:36 changing roles for node 0 from Follower to Candidate
+2023/05/24 09:48:36 term=7
+2023/05/24 09:48:36 ====================node 2 received RequestVote PRC from 0 for term 7====================
+2023/05/24 09:48:36 node 2 voted for 0 for the first time in this term
+2023/05/24 09:48:36 reset election timer for node 2, timeout 631.321685ms
+2023/05/24 09:48:36 ================================================================================
+2023/05/24 09:48:36 node 0 received at least 2 votes, became leader for term=7
+2023/05/24 09:48:36 changing roles for node 0 from Candidate to Leader
+2023/05/24 09:48:36 reset election timer for node 0, timeout 507.324183ms
+2023/05/24 09:48:36 ================================================================================
+2023/05/24 09:48:36 ====================leader 0 sending AppendEntry to node 2, current term=7====================
+2023/05/24 09:48:36 ====================leader 0 sending AppendEntry to node 1, current term=7====================
+2023/05/24 09:48:36 ====================node 2 received AppendEntries PRC from 0, args=&{Term:7 LeaderID:0 PrevLogIndex:6 PrevLogTerm:1 Entries:[] LeaderCommitIndex:5 IsHeartBeat:true}====================
+2023/05/24 09:48:36 reset election timer for node 2, timeout 462.869363ms
+2023/05/24 09:48:36 AppendEntry failed on node 2, log is too short, len=2, args.PrevLogIndex=6
+2023/05/24 09:48:36 ================================================================================
+2023/05/24 09:48:36 leader 0 recerived AppendEntry reply from 2, reply.success=false, reply.Term=7
+2023/05/24 09:48:36 leader 0 can't reach peer 1 to send AppendEntry rpc, rpc timeout
+2023/05/24 09:48:36 node 0 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:36 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:36 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:36 term=8
+2023/05/24 09:48:37 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:37 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:37 node 2 received 1 votes, not enough
+2023/05/24 09:48:37 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:37 reset election timer for node 2, timeout 600.001589ms
+2023/05/24 09:48:37 ================================================================================
+2023/05/24 09:48:37 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:37 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:37 term=9
+2023/05/24 09:48:37 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:37 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:37 node 2 received 1 votes, not enough
+2023/05/24 09:48:37 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:37 reset election timer for node 2, timeout 465.557053ms
+2023/05/24 09:48:37 ================================================================================
+2023/05/24 09:48:38 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:38 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:38 term=10
+2023/05/24 09:48:38 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:38 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:38 node 2 received 1 votes, not enough
+2023/05/24 09:48:38 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:38 reset election timer for node 2, timeout 402.303833ms
+2023/05/24 09:48:38 ================================================================================
+2023/05/24 09:48:38 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:38 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:38 term=11
+2023/05/24 09:48:38 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:38 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:38 node 2 received 1 votes, not enough
+2023/05/24 09:48:38 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:38 reset election timer for node 2, timeout 626.579112ms
+2023/05/24 09:48:38 ================================================================================
+2023/05/24 09:48:39 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:39 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:39 term=12
+2023/05/24 09:48:39 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:39 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:39 node 2 received 1 votes, not enough
+2023/05/24 09:48:39 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:39 reset election timer for node 2, timeout 555.153997ms
+2023/05/24 09:48:39 ================================================================================
+2023/05/24 09:48:40 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:40 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:40 term=13
+2023/05/24 09:48:40 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:40 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:40 node 2 received 1 votes, not enough
+2023/05/24 09:48:40 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:40 reset election timer for node 2, timeout 796.158555ms
+2023/05/24 09:48:40 ================================================================================
+2023/05/24 09:48:40 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:40 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:40 term=14
+2023/05/24 09:48:41 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:41 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:41 node 2 received 1 votes, not enough
+2023/05/24 09:48:41 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:41 reset election timer for node 2, timeout 669.661432ms
+2023/05/24 09:48:41 ================================================================================
+2023/05/24 09:48:41 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:41 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:41 term=15
+2023/05/24 09:48:41 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:41 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:41 node 2 received 1 votes, not enough
+2023/05/24 09:48:41 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:41 reset election timer for node 2, timeout 530.771168ms
+2023/05/24 09:48:41 ================================================================================
+2023/05/24 09:48:42 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:42 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:42 term=16
+2023/05/24 09:48:42 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:42 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:42 node 2 received 1 votes, not enough
+2023/05/24 09:48:42 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:42 reset election timer for node 2, timeout 442.558973ms
+2023/05/24 09:48:42 ================================================================================
+2023/05/24 09:48:42 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:42 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:42 term=17
+2023/05/24 09:48:43 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:43 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:43 node 2 received 1 votes, not enough
+2023/05/24 09:48:43 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:43 reset election timer for node 2, timeout 655.035944ms
+2023/05/24 09:48:43 ================================================================================
+2023/05/24 09:48:43 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:43 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:43 term=18
+2023/05/24 09:48:43 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:43 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:43 node 2 received 1 votes, not enough
+2023/05/24 09:48:43 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:43 reset election timer for node 2, timeout 794.153301ms
+2023/05/24 09:48:43 ================================================================================
+2023/05/24 09:48:44 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:44 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:44 term=19
+2023/05/24 09:48:44 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:44 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:44 node 2 received 1 votes, not enough
+2023/05/24 09:48:44 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:44 reset election timer for node 2, timeout 423.411918ms
+2023/05/24 09:48:44 ================================================================================
+2023/05/24 09:48:45 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:45 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:45 term=20
+2023/05/24 09:48:45 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:45 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:45 node 2 received 1 votes, not enough
+2023/05/24 09:48:45 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:45 reset election timer for node 2, timeout 748.575723ms
+2023/05/24 09:48:45 ================================================================================
+2023/05/24 09:48:45 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:45 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:45 term=21
+2023/05/24 09:48:46 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:46 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:46 node 2 received 1 votes, not enough
+2023/05/24 09:48:46 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:46 reset election timer for node 2, timeout 613.575184ms
+2023/05/24 09:48:46 ================================================================================
+2023/05/24 09:48:46 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:46 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:46 term=22
+2023/05/24 09:48:46 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:46 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:46 node 2 received 1 votes, not enough
+2023/05/24 09:48:46 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:46 reset election timer for node 2, timeout 522.148855ms
+2023/05/24 09:48:46 ================================================================================
+2023/05/24 09:48:47 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:47 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:47 term=23
+2023/05/24 09:48:47 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:47 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:47 node 2 received 1 votes, not enough
+2023/05/24 09:48:47 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:47 reset election timer for node 2, timeout 588.411463ms
+2023/05/24 09:48:47 ================================================================================
+2023/05/24 09:48:47 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:47 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:47 term=24
+2023/05/24 09:48:48 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:48 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:48 node 2 received 1 votes, not enough
+2023/05/24 09:48:48 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:48 reset election timer for node 2, timeout 650.185248ms
+2023/05/24 09:48:48 ================================================================================
+2023/05/24 09:48:48 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:48 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:48 term=25
+2023/05/24 09:48:48 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:48 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:48 node 2 received 1 votes, not enough
+2023/05/24 09:48:48 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:48 reset election timer for node 2, timeout 639.481526ms
+2023/05/24 09:48:48 ================================================================================
+2023/05/24 09:48:49 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:49 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:49 term=26
+2023/05/24 09:48:49 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:49 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:49 node 2 received 1 votes, not enough
+2023/05/24 09:48:49 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:49 reset election timer for node 2, timeout 444.431721ms
+2023/05/24 09:48:49 ================================================================================
+2023/05/24 09:48:50 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:50 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:50 term=27
+2023/05/24 09:48:50 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:50 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:50 node 2 received 1 votes, not enough
+2023/05/24 09:48:50 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:50 reset election timer for node 2, timeout 435.531829ms
+2023/05/24 09:48:50 ================================================================================
+2023/05/24 09:48:50 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:50 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:50 term=28
+2023/05/24 09:48:50 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:50 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:50 node 2 received 1 votes, not enough
+2023/05/24 09:48:50 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:50 reset election timer for node 2, timeout 575.993339ms
+2023/05/24 09:48:50 ================================================================================
+2023/05/24 09:48:51 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:51 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:51 term=29
+2023/05/24 09:48:51 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:51 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:51 node 2 received 1 votes, not enough
+2023/05/24 09:48:51 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:51 reset election timer for node 2, timeout 764.261551ms
+2023/05/24 09:48:51 ================================================================================
+2023/05/24 09:48:52 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:52 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:52 term=30
+2023/05/24 09:48:52 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:52 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:52 node 2 received 1 votes, not enough
+2023/05/24 09:48:52 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:52 reset election timer for node 2, timeout 691.825081ms
+2023/05/24 09:48:52 ================================================================================
+2023/05/24 09:48:52 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:52 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:52 term=31
+2023/05/24 09:48:53 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:53 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:53 node 2 received 1 votes, not enough
+2023/05/24 09:48:53 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:53 reset election timer for node 2, timeout 721.696777ms
+2023/05/24 09:48:53 ================================================================================
+2023/05/24 09:48:53 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:53 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:53 term=32
+2023/05/24 09:48:53 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:53 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:53 node 2 received 1 votes, not enough
+2023/05/24 09:48:53 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:53 reset election timer for node 2, timeout 798.895194ms
+2023/05/24 09:48:53 ================================================================================
+2023/05/24 09:48:54 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:54 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:54 term=33
+2023/05/24 09:48:54 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:54 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:54 node 2 received 1 votes, not enough
+2023/05/24 09:48:54 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:54 reset election timer for node 2, timeout 415.701229ms
+2023/05/24 09:48:54 ================================================================================
+2023/05/24 09:48:55 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:55 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:55 term=34
+2023/05/24 09:48:55 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:55 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:55 node 2 received 1 votes, not enough
+2023/05/24 09:48:55 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:55 reset election timer for node 2, timeout 400.142698ms
+2023/05/24 09:48:55 ================================================================================
+2023/05/24 09:48:55 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:55 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:55 term=35
+2023/05/24 09:48:55 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:55 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:55 node 2 received 1 votes, not enough
+2023/05/24 09:48:55 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:55 reset election timer for node 2, timeout 485.93725ms
+2023/05/24 09:48:55 ================================================================================
+2023/05/24 09:48:56 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:56 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:56 term=36
+2023/05/24 09:48:56 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:56 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:56 node 2 received 1 votes, not enough
+2023/05/24 09:48:56 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:56 reset election timer for node 2, timeout 405.91068ms
+2023/05/24 09:48:56 ================================================================================
+2023/05/24 09:48:56 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:56 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:56 term=37
+2023/05/24 09:48:56 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:56 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:56 node 2 received 1 votes, not enough
+2023/05/24 09:48:56 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:56 reset election timer for node 2, timeout 484.917448ms
+2023/05/24 09:48:56 ================================================================================
+2023/05/24 09:48:57 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:57 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:57 term=38
+2023/05/24 09:48:57 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:57 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:57 node 2 received 1 votes, not enough
+2023/05/24 09:48:57 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:57 reset election timer for node 2, timeout 422.5527ms
+2023/05/24 09:48:57 ================================================================================
+2023/05/24 09:48:57 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:57 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:57 term=39
+2023/05/24 09:48:57 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:57 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:57 node 2 received 1 votes, not enough
+2023/05/24 09:48:57 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:57 reset election timer for node 2, timeout 475.531043ms
+2023/05/24 09:48:57 ================================================================================
+2023/05/24 09:48:58 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:58 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:58 term=40
+2023/05/24 09:48:58 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:58 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:58 node 2 received 1 votes, not enough
+2023/05/24 09:48:58 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:58 reset election timer for node 2, timeout 472.03119ms
+2023/05/24 09:48:58 ================================================================================
+2023/05/24 09:48:59 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:59 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:59 term=41
+2023/05/24 09:48:59 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:59 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:59 node 2 received 1 votes, not enough
+2023/05/24 09:48:59 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:59 reset election timer for node 2, timeout 447.355376ms
+2023/05/24 09:48:59 ================================================================================
+2023/05/24 09:48:59 ====================node 2 started election, role=Follower====================
+2023/05/24 09:48:59 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:48:59 term=42
+2023/05/24 09:48:59 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:48:59 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:48:59 node 2 received 1 votes, not enough
+2023/05/24 09:48:59 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:48:59 reset election timer for node 2, timeout 549.92661ms
+2023/05/24 09:48:59 ================================================================================
+2023/05/24 09:49:00 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:00 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:00 term=43
+2023/05/24 09:49:00 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:00 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:00 node 2 received 1 votes, not enough
+2023/05/24 09:49:00 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:00 reset election timer for node 2, timeout 482.858938ms
+2023/05/24 09:49:00 ================================================================================
+2023/05/24 09:49:00 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:00 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:00 term=44
+2023/05/24 09:49:00 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:00 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:00 node 2 received 1 votes, not enough
+2023/05/24 09:49:00 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:00 reset election timer for node 2, timeout 448.290975ms
+2023/05/24 09:49:00 ================================================================================
+2023/05/24 09:49:01 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:01 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:01 term=45
+2023/05/24 09:49:01 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:01 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:01 node 2 received 1 votes, not enough
+2023/05/24 09:49:01 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:01 reset election timer for node 2, timeout 694.298027ms
+2023/05/24 09:49:01 ================================================================================
+2023/05/24 09:49:02 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:02 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:02 term=46
+2023/05/24 09:49:02 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:02 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:02 node 2 received 1 votes, not enough
+2023/05/24 09:49:02 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:02 reset election timer for node 2, timeout 550.2695ms
+2023/05/24 09:49:02 ================================================================================
+2023/05/24 09:49:02 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:02 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:02 term=47
+2023/05/24 09:49:02 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:02 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:02 node 2 received 1 votes, not enough
+2023/05/24 09:49:02 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:02 reset election timer for node 2, timeout 709.208187ms
+2023/05/24 09:49:02 ================================================================================
+2023/05/24 09:49:03 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:03 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:03 term=48
+2023/05/24 09:49:03 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:03 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:03 node 2 received 1 votes, not enough
+2023/05/24 09:49:03 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:03 reset election timer for node 2, timeout 667.078166ms
+2023/05/24 09:49:03 ================================================================================
+2023/05/24 09:49:04 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:04 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:04 term=49
+2023/05/24 09:49:04 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:04 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:04 node 2 received 1 votes, not enough
+2023/05/24 09:49:04 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:04 reset election timer for node 2, timeout 653.222146ms
+2023/05/24 09:49:04 ================================================================================
+2023/05/24 09:49:05 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:05 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:05 term=50
+2023/05/24 09:49:05 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:05 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:05 node 2 received 1 votes, not enough
+2023/05/24 09:49:05 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:05 reset election timer for node 2, timeout 427.985306ms
+2023/05/24 09:49:05 ================================================================================
+2023/05/24 09:49:05 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:05 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:05 term=51
+2023/05/24 09:49:05 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:05 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:05 node 2 received 1 votes, not enough
+2023/05/24 09:49:05 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:05 reset election timer for node 2, timeout 509.937225ms
+2023/05/24 09:49:05 ================================================================================
+2023/05/24 09:49:06 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:06 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:06 term=52
+2023/05/24 09:49:06 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:06 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:06 node 2 received 1 votes, not enough
+2023/05/24 09:49:06 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:06 reset election timer for node 2, timeout 620.890593ms
+2023/05/24 09:49:06 ================================================================================
+2023/05/24 09:49:06 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:06 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:06 term=53
+2023/05/24 09:49:07 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:07 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:07 node 2 received 1 votes, not enough
+2023/05/24 09:49:07 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:07 reset election timer for node 2, timeout 487.653271ms
+2023/05/24 09:49:07 ================================================================================
+2023/05/24 09:49:07 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:07 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:07 term=54
+2023/05/24 09:49:07 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:07 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:07 node 2 received 1 votes, not enough
+2023/05/24 09:49:07 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:07 reset election timer for node 2, timeout 473.22764ms
+2023/05/24 09:49:07 ================================================================================
+2023/05/24 09:49:08 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:08 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:08 term=55
+2023/05/24 09:49:08 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:08 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:08 node 2 received 1 votes, not enough
+2023/05/24 09:49:08 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:08 reset election timer for node 2, timeout 766.606405ms
+2023/05/24 09:49:08 ================================================================================
+2023/05/24 09:49:09 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:09 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:09 term=56
+2023/05/24 09:49:09 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:09 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:09 node 2 received 1 votes, not enough
+2023/05/24 09:49:09 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:09 reset election timer for node 2, timeout 623.155959ms
+2023/05/24 09:49:09 ================================================================================
+2023/05/24 09:49:09 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:09 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:09 term=57
+2023/05/24 09:49:09 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:09 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:09 node 2 received 1 votes, not enough
+2023/05/24 09:49:09 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:09 reset election timer for node 2, timeout 465.52304ms
+2023/05/24 09:49:09 ================================================================================
+2023/05/24 09:49:10 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:10 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:10 term=58
+2023/05/24 09:49:10 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:10 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:10 node 2 received 1 votes, not enough
+2023/05/24 09:49:10 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:10 reset election timer for node 2, timeout 467.054109ms
+2023/05/24 09:49:10 ================================================================================
+2023/05/24 09:49:10 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:10 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:10 term=59
+2023/05/24 09:49:10 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:10 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:10 node 2 received 1 votes, not enough
+2023/05/24 09:49:10 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:10 reset election timer for node 2, timeout 525.563291ms
+2023/05/24 09:49:10 ================================================================================
+2023/05/24 09:49:11 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:11 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:11 term=60
+2023/05/24 09:49:11 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:11 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:11 node 2 received 1 votes, not enough
+2023/05/24 09:49:11 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:11 reset election timer for node 2, timeout 728.443065ms
+2023/05/24 09:49:11 ================================================================================
+2023/05/24 09:49:12 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:12 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:12 term=61
+2023/05/24 09:49:12 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:12 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:12 node 2 received 1 votes, not enough
+2023/05/24 09:49:12 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:12 reset election timer for node 2, timeout 710.524954ms
+2023/05/24 09:49:12 ================================================================================
+2023/05/24 09:49:13 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:13 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:13 term=62
+2023/05/24 09:49:13 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:13 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:13 node 2 received 1 votes, not enough
+2023/05/24 09:49:13 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:13 reset election timer for node 2, timeout 426.879731ms
+2023/05/24 09:49:13 ================================================================================
+2023/05/24 09:49:13 ====================node 2 started election, role=Follower====================
+2023/05/24 09:49:13 changing roles for node 2 from Follower to Candidate
+2023/05/24 09:49:13 term=63
+2023/05/24 09:49:13 node 2 can't reach peer 1 to send request vote rpc, rpc timeout
+2023/05/24 09:49:13 node 2 can't reach peer 0 to send request vote rpc, rpc timeout
+2023/05/24 09:49:13 node 2 received 1 votes, not enough
+2023/05/24 09:49:13 changing roles for node 2 from Candidate to Follower
+2023/05/24 09:49:13 reset election timer for node 2, timeout 422.773658ms
+2023/05/24 09:49:13 ================================================================================
+signal: interrupt
+FAIL	github.com/jerrywang1010/6.824/src/raft	42.464s

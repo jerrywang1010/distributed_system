@@ -123,7 +123,6 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 	for !rf.killed() {
 		rf.mu.Lock()
 		needUnlock = true
-
 		rf.resetAppendEntryTimerForPeer(i)
 		if rf.role != Leader {
 			return
@@ -160,7 +159,7 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 		}
 		rf.mu.Lock()
 		needUnlock = true
-		DPrintf("leader %v recerived AppendEntry reply from %v, reply.success=%v, reply.Term=%v", rf.me, i, reply.Success, reply.Term)
+		DPrintf("leader %v recerived AppendEntry reply from %v, reply=%+v", rf.me, i, reply)
 
 		if rf.role != Leader {
 			return
@@ -185,7 +184,9 @@ func (rf *Raft) sendAppendEntriesToPeer(i int) {
 			}
 			return
 		} else { // append entry failed
-			// retry with updated nextIndex
+			// retry with updated nextIndex, unlock and retry
+			rf.mu.Unlock()
+			needUnlock = false
 			continue
 		}
 	}
@@ -262,7 +263,7 @@ func (rf *Raft) AppendEntries(args *AppendEntryArgs, reply *AppendEntryReply) {
 		} else {
 			rf.commitIndex = len(rf.log) - 1
 		}
-		DPrintf("Node%v, updating commitIndex to %v", rf.me, rf.commitIndex)
+		DPrintf("Node %v, updating commitIndex to %v", rf.me, rf.commitIndex)
 		rf.readyToApplyCh <- struct{}{} // for followers
 	}
 }
